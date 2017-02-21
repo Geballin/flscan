@@ -1,0 +1,108 @@
+What is flscan?
+---------------
+FlScan is a SANE (Scanner access now's easy) frontend based on the FLTK GUI
+toolkit. This is version 1.0.2
+
+What can it do, in its present form?
+------------------------------------
+- Preview the image at a low resolution before scan it at an higher resolution
+  (the preview image will never be greater then the preview area)
+- Rotate and flip the image and adjust the horizont of the image during preview
+  so the scanned image will be saved with all the tranformations you've done
+- Aquire only a portion of the full image by selecting a rectangular area
+- Save the image either in JPEG or in PNG format
+- Save the image at many resolution in a time (Full Size = scan resolution,
+  1024, 912, 700, 512, 400 pixels at maximum side), choosing among 15 different
+  rescaling algorithms
+- View the acquired image at the saved resolution, eventually panning with the
+  scroll bars.
+- Automagically support for all the options of all the image acquisition
+  devices supported by SANE (FlScan will automatically grow as the SANE will
+  grow) [I hope, cose I've only tested it with coolscan and pnm drivers]
+
+How do I use it?
+----------------
+If you've correctly configured SANE, just run flscan, if SANE can find
+an image acquisition device attacched to your computer, flscan will start
+presenting on the top right side a list of grouped options for the device
+found (you can change the device by selecting the "Device" option in the
+"Device Selection" group).
+Now you can play by selecting the options you want to inspect/modify, below
+the options list will appear the controls to modify the option's value,
+initialized with the current value of the option selected, when you change
+the value will appear the "Set" button, clicking it will set the value.
+After you've configured the device by playing with the options you can
+preview the image by pressing the "Preview" button, after a while an image
+will appear in the white square on the left, you can rotate and flip the
+image or you can adjust its horizont by the aid of the "Pisa Tower" tool
+(just place the cross air in a point, then drag towards another point, you
+will see a rubber line, drop the cross and voila' the image will rotate in
+a way that the rubber line is the new horizont or azimut if it was closed
+to the vertical then the horizontal).
+Now you can change some other scanner options (i.e. the gamma correction,
+if supported) and click "Preview" until you are satisfied by the preview,
+after that you can select the portion of the image you want to save by
+dragging an dropping the cross air, the selected area will be surrounded
+by a dashed and dotted rectangle.
+Insert the name for the image to save, select the output image format
+(JPEG or PNG), go to the "Application" tab (top right), choose the "Image
+Converter Settings" to set the image output quality, then choose the "Output
+file resolutions"  and select all the resolution you want your image will
+be saved (default is "Full Size"), choose the "Zoom Filter" if you know what
+you're doing (leave the default if you don't), then press the "Scan" button.
+You can follow the saving process by selecting the "Conversions Status"
+tab (the floppy icon, top left).
+After the saving process has ended you can view the images you've saved by
+selecting the "Image Viewer" tab (the photo camera icon, top left), the
+rigth side of the application will change in a file selector from which
+you can choose the image to view that will appear in the white square on
+the left at the real size of the image selected.
+If SANE can't find any device you can only view images by the "Image
+Viewer" tab.
+The window can be resized only by the four tools on the left of the quit
+icon (the 'X' on the right), changing the size of the window will affect
+the size of the preview image.
+That's all.
+
+What do I need to compile it?
+-----------------------------
+You need:
+- FLTK 1.1.x, the Fast Light Tool Kit (http://www.fltk.org)
+- SANE, at least 1.0.4 (http://www.mostang.com/sane)
+- libpng, at least 1.0.11
+- jpeg6
+- CMake 1.6.7 (http://www.cmake.org)
+
+How do I compile and install it?
+--------------------------------
+1. install or compile and install the FLTK, SANE, libpng and jpeg6 packages.
+2. install or compile and install CMake.
+3. cd /where/you/untarred/flscan-1.0.2; cmake && make
+4. as root you can: make install
+   The default installation prefix if /usr/local, to change this, edit the file
+   CMakeFlags.cfg and change the setting for CMAKE_CONFIGURE_INSTALL_PREFIX
+
+Contact me if there is a problem.
+
+Are there any known bugs?
+-------------------------
+1. the "Cancel" button doesn't work
+2. changing the acquisition device on the fly doesn't work properly
+3. all the unknown bugs.
+
+What is the copying policy?
+---------------------------
+GPL, of course.
+While it is copyright, (C) 2001-2002 by Francesco Bradascio, the program
+is also free software; you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by  the Free
+Software Foundation; either version 2 of the License, or (at your option)
+any later version.  This program is distributed in the hope that it will
+be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
+Public License for more details.  You will receive a copy of the GNU General
+Public License along with this program; for more information, write to
+the Free Software  oundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+Francesco Bradascio
+fbradasc@katamail.com
