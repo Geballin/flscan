@@ -1,0 +1,3121 @@
+# data file for the Fltk User Interface Designer (fluid)
+version 1.0104 
+i18n_type 1 
+i18n_include <libintl.h> 
+i18n_function gettext 
+header_name {.h} 
+code_name {.cxx}
+decl {\#include <stdio.h>} {} 
+
+decl {\#include <stdlib.h>} {} 
+
+decl {\#include <ctype.h>} {} 
+
+decl {\#include <strings.h>} {} 
+
+decl {\#include <FL/filename.H>} {} 
+
+decl {\#include <FL/fl_ask.H>} {} 
+
+decl {\#include <FL/Fl_Box.H>} {public
+} 
+
+decl {\#include <sys/stat.h>} {} 
+
+decl {\#include <sys/types.h>} {} 
+
+decl {\#include <fcntl.h>} {} 
+
+decl {\#include <unistd.h>} {} 
+
+decl {\#include <ctype.h>} {} 
+
+decl {\#include "C_Sane.H"} {public
+} 
+
+decl {\#include "Output_File.H"} {} 
+
+decl {\#include "flscan_thread.h"} {public
+} 
+
+decl {\#include <Threads.H>} {public
+} 
+
+decl {Trigger running;} {public
+} 
+
+decl {\#define TEXT_TO_SLIDER 1} {} 
+
+decl {\#define SLIDER_TO_TEXT !TEXT_TO_SLIDER} {} 
+
+decl {\#define DECREASE_SIZE -1} {} 
+
+decl {\#define INCREASE_SIZE -2} {} 
+
+decl {\#define FIT_TO_SCREEN -3} {} 
+
+decl {\#define FL_SCAN_OUTPUT_FILE_RESOLUTION -4} {} 
+
+decl {\#define FL_SCAN_CONVERTERS_SETTINGS -3} {} 
+
+decl {\#define FL_SCAN_HISTOGRAM -2} {} 
+
+decl {\#define FL_SCAN_DEVICE_SELECTION -1} {} 
+
+decl {\#define FL_SCAN_SCAN_MODE 0} {} 
+
+decl {\#define FL_SCAN_VIEW_MODE !FL_SCAN_SCAN_MODE} {} 
+
+decl {int preview_ndx=-1;} {} 
+
+decl {int tl_x_ndx=-1;} {} 
+
+decl {int tl_y_ndx=-1;} {} 
+
+decl {int br_x_ndx=-1;} {} 
+
+decl {int br_y_ndx=-1;} {} 
+
+decl {C_Sane *sane;} {public
+} 
+
+decl {C_Sane_Option *currentOption=0;} {} 
+
+decl {SANE_Int currentOption_num=0;} {} 
+
+decl {Fl_Group *lastOption=0;} {} 
+
+decl {Fl_Window *copyrightWindow=0;} {} 
+
+decl {char *sane_host;} {public
+} 
+
+decl {char *scan_buf=0;} {} 
+
+decl {Output_File FlScanOutputFile;} {} 
+
+decl {extern char *copyrightText;} {public
+} 
+
+decl {int FlScanZoomFilter=Image_Stream::UNDEFINED_FILTER;} {} 
+
+class EatEvent {open : {public Fl_Box}
+} {
+  Function {EatEvent(int x,int y,int w,int h,const char *l=0): Fl_Box(x,y,w,h,l)} {open
+  } {}
+  Function {handle(int e)} {open return_type int
+  } {
+    code {//
+  switch (e) {
+      case FL_PUSH:
+      case FL_RELEASE:
+          return 1;
+      default:
+          return 0;
+  }
+  return 0;} {}
+  }
+} 
+
+class ImageSavingMonitor {open : {public Thread}
+} {
+  Function {thread()} {open return_type void
+  } {
+    code {bool allSaved=false;
+const char *pStrProgress;
+
+    FL_TOGGLE_THREAD();
+    while (!allSaved) {
+//        Fl::wait(1);
+        allSaved=true;
+        for (
+            int i=0;
+            (pStrProgress=FlScanConversionArea->get_value(i,2));
+            i++
+        ) {
+            if (strcmp(pStrProgress,"Completed")) {
+                allSaved=false;
+                break;
+            }
+        }
+        FlScanEeWaitForSaving->redraw();
+        sleep(1);
+    }
+    FlScanPbExit->do_callback();
+    FL_TOGGLE_THREAD();} {}
+  }
+  Function {ImageSavingMonitor()} {open C
+  } {
+    code {\#ifdef THREADED_SAVING
+     create();
+\#else
+     thread();
+\#endif} {}
+  }
+} 
+
+Function {auth_callback(SANE_String_Const domain,SANE_Char username[SANE_MAX_USERNAME_LEN],SANE_Char password[SANE_MAX_PASSWORD_LEN])} {open return_type void
+} {
+  code {printf ("Client '%s' requested authorization.\\nUser:\\n", domain);
+    scanf ("%s", username);
+    printf ("Password:\\n");
+    scanf ("%s", password);} {}
+} 
+
+Function {makeFlSCAN(bool enable_scan)} {open
+} {
+  Fl_Window FlScan {
+    label {Fl Scan} open selected
+    xywh {3 490 640 480} type Double
+    code0 {o->size_range(640,480,640,480);}
+    code1 {copyrightWindow=make_copyright_window(copyrightText);} modal visible
+  } {
+    Fl_Group FlScanContainer {open
+      xywh {0 0 640 480}
+    } {
+      Fl_Group {} {
+        xywh {460 0 175 480} box FLAT_BOX
+      } {
+        Fl_Browser FlScanScannerOptions {
+          label Scanner
+          callback cb_selectoption
+          tooltip {Scanner Specific Settings} xywh {460 5 175 200} type Select box THIN_DOWN_BOX color 49 selection_color 49 labeltype NO_LABEL labelfont 1 labelsize 12 align 1 when 4 textsize 12 resizable
+          code0 {\#include <FL/Fl_Tree_Browser.H>}
+          class Fl_Tree_Browser
+        }
+        Fl_Group FlScanSettings {open
+          xywh {460 350 175 100} box THIN_DOWN_BOX
+        } {
+          Fl_Group FlScanMisc {open
+            xywh {461 351 173 98} box FLAT_BOX labeltype NO_LABEL align 0
+          } {
+            Fl_Choice FlScanScanFileType {open
+              xywh {570 355 60 20} box ENGRAVED_BOX down_box BORDER_BOX labeltype NO_LABEL labelfont 1
+              code0 {\#include <FL/Fl_Sorted_Choice.H>}
+              class Fl_Sorted_Choice
+            } {
+              menuitem FlScanScanFileTypeJPEG {
+                label {.jpeg}
+                callback {FlScanOutputFile.type(Output_File::JPEG);}
+                xywh {75 355 100 20} labelfont 1 labelsize 12
+              }
+              menuitem FlScanScanFileTypePNG {
+                label {.png}
+                callback {FlScanOutputFile.type(Output_File::PNG);}
+                xywh {55 355 100 20} labelfont 1 labelsize 12
+              }
+              menuitem FlScanScanFileTypePNM {
+                label {.pnm}
+                callback {/* FlScanOutputFile.type(Output_File::PNM); */}
+                xywh {65 355 100 20} labelfont 1 labelsize 12 hide
+              }
+              menuitem FlScanScanFileTypeRAW {
+                label {.raw}
+                callback {/* FlScanOutputFile.type(Output_File::RAW);*/}
+                xywh {25 355 100 20} labelfont 1 labelsize 12 hide
+              }
+              menuitem FlScanScanFileTypeTIFF {
+                label {.tiff}
+                callback {/* FlScanOutputFile.type(Output_File::TIFF);*/}
+                xywh {85 355 100 20} labelfont 1 labelsize 12 hide
+              }
+            }
+            Fl_Input FlScanTxFileName {
+              callback {if (strlen(FlScanTxFileName->value())) {
+    FlScanPbScan->activate();
+} else {
+    FlScanPbScan->deactivate();
+}}
+              tooltip {Output file name} xywh {465 355 105 20} box THIN_DOWN_BOX labeltype NO_LABEL labelfont 1 labelsize 12 when 1 textfont 1 textsize 12
+            }
+            Fl_Box FlScanLbSeparator {
+              xywh {465 379 165 2} box THIN_DOWN_FRAME labeltype NO_LABEL hide
+            }
+            Fl_Button FlScanPbFileSelector {
+              callback {char *outputName;
+
+    outputName=fl_file_chooser("Save Scan As ...",FlScanOutputFile.filter(),NULL);
+    if (outputName) {
+        FlScanTxFileName->value(outputName);
+    } else {
+        FlScanTxFileName->value("");
+    }
+    FlScanTxFileName->do_callback();}
+              image {./pixmaps/file.xpm} xywh {465 355 20 20} box ENGRAVED_BOX hide
+              code0 {\#include <FL/fl_file_chooser.H>}
+            }
+            Fl_Button FlScanPbPreview {
+              label Preview
+              callback {FlScanPreviewCB(0,0,C_Sane::USER_MODE);}
+              xywh {465 380 80 30} box ENGRAVED_BOX labelfont 1 labelsize 12
+            }
+            Fl_Button FlScanPbScan {
+              label Scan
+              callback {FlScanPbCancel->activate();
+FlScanScanCB(0,0,C_Sane::USER_MODE);
+FlScanPbCancel->deactivate();}
+              xywh {550 380 80 30} box ENGRAVED_BOX labelfont 1 labelsize 12 deactivate
+            }
+            Fl_Button FlScanPbReset {
+              label Reset
+              callback {FlScanSaveCurrentDevice();
+sane->open(NULL); /* reopen current device */
+FlScanLoadCurrentDevice();
+update_tree();}
+              xywh {550 415 80 30} box ENGRAVED_BOX labelfont 1 labelsize 12 hide
+            }
+            Fl_Button FlScanPbCancel {
+              label Cancel
+              callback {sane->cancel();}
+              xywh {465 415 80 30} box ENGRAVED_BOX labelfont 1 labelsize 12 deactivate
+            }
+          }
+        }
+        Fl_Group FlScanSetOption {open
+          xywh {460 205 175 145} box THIN_DOWN_BOX labelsize 12 align 85
+        } {
+          Fl_Button FlScanPbAutoOption {
+            label Auto
+            callback {FlScanSaneSetCB(true);}
+            xywh {465 325 80 20} box ENGRAVED_BOX labelfont 1 labelsize 12 hide
+          }
+          Fl_Button FlScanPbSetOption {
+            label Set
+            callback {FlScanSaneSetCB(false);
+FlScanPbSetOption->hide();}
+            xywh {550 325 80 20} box ENGRAVED_BOX labelfont 1 labelsize 12 hide
+          }
+          Fl_Group FlScanBoolGroup {open
+            xywh {461 206 173 143} labeltype NO_LABEL labelsize 12 align 64 hide
+          } {
+            Fl_Light_Button FlScanTbBoolType {
+              callback {FlScanSaneSetCB(false);}
+              xywh {461 270 173 20} box NO_BOX labelsize 12 align 16
+            }
+          }
+          Fl_Group FlScanFixedGroup {open
+            xywh {461 206 173 119} labeltype NO_LABEL labelsize 12 align 64 hide
+          } {
+            Fl_Input FlScanTxFixedType {
+              label {Real Input:}
+              callback {FlScanPbSetOption->show();}
+              xywh {535 275 95 20} type Float box THIN_DOWN_BOX labelsize 12 when 1 textsize 12
+            }
+          }
+          Fl_Group FlScanIntGroup {open
+            xywh {461 206 173 119} labeltype NO_LABEL labelsize 12 align 64 hide
+          } {
+            Fl_Input FlScanTxIntType {
+              label {Integer Input:}
+              callback {FlScanPbSetOption->show();}
+              xywh {550 275 80 20} type Int box THIN_DOWN_BOX labelsize 12 when 1 textsize 12
+            }
+          }
+          Fl_Group FlScanStringGroup {open
+            xywh {461 206 173 119} labeltype NO_LABEL labelsize 12 align 64 hide
+          } {
+            Fl_Input FlScanTxStringType {
+              label {Input:}
+              callback {FlScanPbSetOption->show();}
+              xywh {465 275 165 20} box THIN_DOWN_BOX labeltype NO_LABEL labelsize 12 when 1 textsize 12
+            }
+          }
+          Fl_Group FlScanButtonGroup {open
+            xywh {461 206 173 143} labeltype NO_LABEL labelsize 12 align 64 hide
+          } {
+            Fl_Button FlScanPbButtonType {
+              label Execute
+              callback {FlScanSaneSetCB(false);}
+              xywh {465 260 165 45} box ENGRAVED_BOX labelfont 1 labelsize 12
+            }
+          }
+          Fl_Group FlScanRangeGroup {open
+            xywh {461 206 173 119} labeltype NO_LABEL labelsize 12 align 64 hide
+          } {
+            Fl_Slider FlScanSlRangeType {
+              callback {FlScanViRangeType->value(FlScanSlRangeType->value());
+FlScanPbSetOption->show();}
+              xywh {520 275 110 20} type {Horz Knob} box THIN_DOWN_BOX
+            }
+            Fl_Value_Input FlScanViRangeType {
+              callback {FlScanSlRangeType->value(FlScanViRangeType->value());
+FlScanPbSetOption->show();}
+              xywh {465 275 55 20} box THIN_DOWN_BOX labeltype NO_LABEL labelsize 12 textfont 1 textsize 12
+            }
+          }
+          Fl_Group FlScanListGroup {open
+            xywh {461 206 173 143} labeltype NO_LABEL labelsize 12 align 64 hide
+          } {
+            Fl_Choice FlScanMnListType {
+              xywh {465 275 165 20} box ENGRAVED_BOX down_box BORDER_BOX labelsize 12 textsize 12
+              code0 {\#include <FL/Fl_Sorted_Choice.H>}
+              class Fl_Sorted_Choice
+            } {}
+          }
+          Fl_Group FlScanMessage {
+            xywh {461 220 173 129} box FLAT_BOX labelsize 12 align 16 hide
+          } {}
+          Fl_Group FlScanTableGroup {
+            xywh {461 220 173 105} box FLAT_BOX labelfont 1 labelsize 12 align 16 hide
+          } {
+            Fl_Button FlScanRbSplineTable {
+              callback {FlScanTableGammaCurve->type(Fl_Curve::SPLINE);}
+              tooltip {Spline Curve} image {./pixmaps/spline.xpm} xywh {465 220 20 20} type Radio box FLAT_BOX down_box THIN_DOWN_BOX selection_color 3
+              code0 {\#include <FL/Fl_RaiseButton.H>}
+              code1 {o->hilighted_box(FL_THIN_UP_BOX);}
+              class Fl_RaiseButton
+            }
+            Fl_Button FlScanRbLinearTable {
+              callback {FlScanTableGammaCurve->type(Fl_Curve::LINEAR);}
+              tooltip {Linear Curve} image {./pixmaps/linear.xpm} xywh {485 220 20 20} type Radio box FLAT_BOX down_box THIN_DOWN_BOX selection_color 3
+              code0 {\#include <FL/Fl_RaiseButton.H>}
+              code1 {o->hilighted_box(FL_THIN_UP_BOX);}
+              class Fl_RaiseButton
+            }
+            Fl_Button FlScanRbFreeTable {
+              callback {FlScanTableGammaCurve->type(Fl_Curve::FREE);}
+              tooltip {Free Curve} image {./pixmaps/free.xpm} xywh {505 220 20 20} type Radio box FLAT_BOX down_box THIN_DOWN_BOX selection_color 3
+              code0 {\#include <FL/Fl_RaiseButton.H>}
+              code1 {o->hilighted_box(FL_THIN_UP_BOX);}
+              class Fl_RaiseButton
+            }
+            Fl_Box {} {
+              xywh {527 220 2 20} box THIN_DOWN_BOX labeltype NO_LABEL
+            }
+            Fl_Button FlScanPbGammaTable {
+              callback {FlScanTableSetGamma();}
+              tooltip Gamma image {./pixmaps/gamma.xpm} xywh {530 220 20 20} box FLAT_BOX down_box THIN_DOWN_BOX selection_color 3
+              code0 {\#include <FL/Fl_RaiseButton.H>}
+              code1 {o->hilighted_box(FL_THIN_UP_BOX);}
+              class Fl_RaiseButton
+            }
+            Fl_Input FlScanTxGammaTable {
+              callback {FlScanTableSetGamma();}
+              xywh {550 220 55 20} type Float box THIN_DOWN_BOX labeltype NO_LABEL labelsize 12 when 8 textsize 12
+            }
+            Fl_Box {} {
+              xywh {607 220 2 20} box THIN_DOWN_BOX labeltype NO_LABEL
+            }
+            Fl_Button FlScanPbResetTable {
+              callback {FlScanTableGammaCurve->reset();}
+              tooltip {Reset Curve} image {./pixmaps/reset.xpm} xywh {610 220 20 20} box FLAT_BOX down_box THIN_DOWN_BOX
+              code0 {\#include <FL/Fl_RaiseButton.H>}
+              code1 {o->hilighted_box(FL_THIN_UP_BOX);}
+              class Fl_RaiseButton
+            }
+            Fl_Group FlScanGroupTableType {
+              xywh {465 240 165 80} box THIN_DOWN_BOX
+            } {
+              Fl_Box FlScanTableGammaCurve {
+                callback {switch (FlScanTableGammaCurve->type()) {
+    case Fl_Curve::FREE:
+        FlScanRbFreeTable->setonly();
+        break;
+    case Fl_Curve::LINEAR:
+        FlScanRbLinearTable->setonly();
+        break;
+    case Fl_Curve::SPLINE:
+        FlScanRbSplineTable->setonly();
+        break;
+}
+FlScanPbSetOption->show();}
+                xywh {466 241 163 78} box FLAT_BOX color 7 labeltype NO_LABEL when 1
+                code0 {\#include <FL/Fl_Curve.H>}
+                class Fl_Curve
+              }
+            }
+          }
+          Fl_Group FlScanOutputResolutions {
+            xywh {461 220 173 129} box FLAT_BOX labeltype NO_LABEL hide
+          } {
+            Fl_Browser FlScanLsOutputGeometries {
+              label {Output Image will...}
+              tooltip {Select the geometries of the output image files} xywh {465 220 165 105} type Multi box THIN_DOWN_BOX labeltype NO_LABEL labelsize 12 align 5
+              code0 {FlScanFillInGeometries(o);}
+            }
+            Fl_Choice FlScanOmZoomFilter {
+              label Filter open
+              xywh {505 325 125 20} box ENGRAVED_BOX down_box BORDER_BOX labelsize 12 textsize 12
+              code0 {\#include <FL/Fl_Sorted_Choice.H>}
+              code1 {o->value(1);}
+              code2 {FlScanZoomFilter=Image_Stream::BOX_FILTER;}
+              class Fl_Sorted_Choice
+            } {
+              menuitem {} {
+                label Point
+                callback {FlScanZoomFilter=Image_Stream::POINT_FILTER;}
+                xywh {15 15 100 20} labelfont 1 labelsize 12
+              }
+              menuitem {} {
+                label Box
+                callback {FlScanZoomFilter=Image_Stream::BOX_FILTER;}
+                xywh {25 25 100 20} labelfont 1 labelsize 12
+              }
+              menuitem {} {
+                label Triangle
+                callback {FlScanZoomFilter=Image_Stream::TRIANGLE_FILTER;}
+                xywh {35 35 100 20} labelfont 1 labelsize 12
+              }
+              menuitem {} {
+                label Hermite
+                callback {FlScanZoomFilter=Image_Stream::HERMITE_FILTER;}
+                xywh {45 45 100 20} labelfont 1 labelsize 12
+              }
+              menuitem {} {
+                label Hanning
+                callback {FlScanZoomFilter=Image_Stream::HANNING_FILTER;}
+                xywh {55 55 100 20} labelfont 1 labelsize 12
+              }
+              menuitem {} {
+                label Hamming
+                callback {FlScanZoomFilter=Image_Stream::HAMMING_FILTER;}
+                xywh {65 65 100 20} labelfont 1 labelsize 12
+              }
+              menuitem {} {
+                label Blackman
+                callback {FlScanZoomFilter=Image_Stream::BLACKMAN_FILTER;}
+                xywh {75 75 100 20} labelfont 1 labelsize 12
+              }
+              menuitem {} {
+                label Gaussian
+                callback {FlScanZoomFilter=Image_Stream::GAUSSIAN_FILTER;}
+                xywh {85 85 100 20} labelfont 1 labelsize 12
+              }
+              menuitem {} {
+                label Quadratic
+                callback {FlScanZoomFilter=Image_Stream::QUADRATIC_FILTER;}
+                xywh {95 95 100 20} labelfont 1 labelsize 12
+              }
+              menuitem {} {
+                label Cubic
+                callback {FlScanZoomFilter=Image_Stream::CUBIC_FILTER;}
+                xywh {105 105 100 20} labelfont 1 labelsize 12
+              }
+              menuitem {} {
+                label Catrom
+                callback {FlScanZoomFilter=Image_Stream::CATROM_FILTER;}
+                xywh {115 115 100 20} labelfont 1 labelsize 12
+              }
+              menuitem {} {
+                label Mitchell
+                callback {FlScanZoomFilter=Image_Stream::MITCHELL_FILTER;}
+                xywh {125 125 100 20} labelfont 1 labelsize 12
+              }
+              menuitem {} {
+                label Lanczos
+                callback {FlScanZoomFilter=Image_Stream::LANCZOS_FILTER;}
+                xywh {135 135 100 20} labelfont 1 labelsize 12
+              }
+              menuitem {} {
+                label Bessel
+                callback {FlScanZoomFilter=Image_Stream::BESSEL_FILTER;}
+                xywh {145 145 100 20} labelfont 1 labelsize 12
+              }
+              menuitem {} {
+                label Sinc
+                callback {FlScanZoomFilter=Image_Stream::SINC_FILTER;}
+                xywh {155 155 100 20} labelfont 1 labelsize 12
+              }
+            }
+          }
+          Fl_Group FlScanHistogram {
+            tooltip Histogram xywh {461 220 173 129} box FLAT_BOX labeltype NO_LABEL hide
+          } {
+            Fl_Button FlScanHistogramPbIntensity {
+              label I
+              callback {FlScanHistogramTgIntensity->value(!FlScanHistogramTgIntensity->value());
+FlScanHistogramTgIntensity->do_callback();}
+              tooltip {Toggle Intensity} xywh {475 330 15 15} box BORDER_BOX color 0 selection_color 0 labelfont 1 labelsize 12 labelcolor 7 align 16
+            }
+            Fl_Button FlScanHistogramPbRed {
+              label R
+              callback {FlScanHistogramTgRed->value(!FlScanHistogramTgRed->value());
+FlScanHistogramTgRed->do_callback();}
+              tooltip {Toggle Red} xywh {510 330 15 15} box BORDER_BOX color 1 selection_color 1 labelfont 1 labelsize 12 labelcolor 7 align 16
+            }
+            Fl_Button FlScanHistogramPbBlue {
+              label B
+              callback {FlScanHistogramTgBlue->value(!FlScanHistogramTgBlue->value());
+FlScanHistogramTgBlue->do_callback();}
+              tooltip {Toggle Blue} xywh {560 330 15 15} box BORDER_BOX color 4 selection_color 4 labelfont 1 labelsize 12 labelcolor 7 align 16
+            }
+            Fl_Button FlScanHistogramPbGreen {
+              label G
+              callback {FlScanHistogramTgGreen->value(!FlScanHistogramTgGreen->value());
+FlScanHistogramTgGreen->do_callback();}
+              tooltip {Toggle Green} xywh {535 330 15 15} box BORDER_BOX color 2 selection_color 2 labelfont 1 labelsize 12 align 16
+            }
+            Fl_Button FlScanHistogramPbLog {
+              label L
+              callback {FlScanHistogramTgLog->value(!FlScanHistogramTgLog->value());
+FlScanHistogramTgLog->do_callback();}
+              tooltip {Toggle Logarithmic Representation} xywh {615 330 15 15} box BORDER_BOX labelfont 1 labelsize 12 align 16
+            }
+            Fl_Button FlScanHistogramPbPixel {
+              label P
+              callback {FlScanHistogramTgPixel->value(!FlScanHistogramTgPixel->value());
+FlScanHistogramTgPixel->do_callback();}
+              tooltip {Toggle Point Representation} xywh {590 330 15 15} box BORDER_BOX labelfont 1 labelsize 12 align 16
+            }
+            Fl_Group FlScanHistogramCanvas {open
+              xywh {465 220 165 110} box THIN_DOWN_BOX color 7 labeltype NO_LABEL labelfont 1 labelsize 12
+            } {}
+            Fl_Light_Button FlScanHistogramTgIntensity {
+              callback {printf("toggle\\n");}
+              tooltip {Toggle Intensity} xywh {465 330 10 15} box NO_BOX color 50 labeltype NO_LABEL labelfont 1 labelsize 10
+            }
+            Fl_Light_Button FlScanHistogramTgRed {
+              callback {printf("toggle\\n");}
+              tooltip {Toggle Red} xywh {500 330 10 15} box NO_BOX color 50 labeltype NO_LABEL labelfont 1 labelsize 12
+            }
+            Fl_Light_Button FlScanHistogramTgGreen {
+              callback {printf("toggle\\n");}
+              tooltip {Toggle Green} xywh {525 330 10 15} box NO_BOX color 50 labeltype NO_LABEL labelfont 1 labelsize 10
+            }
+            Fl_Light_Button FlScanHistogramTgBlue {
+              callback {printf("toggle\\n");}
+              tooltip {Toggle Blue} xywh {550 330 10 15} box NO_BOX color 50 labeltype NO_LABEL labelfont 1 labelsize 10
+            }
+            Fl_Light_Button FlScanHistogramTgPixel {
+              callback {printf("toggle\\n");}
+              tooltip {Toggle Point Representation} xywh {580 330 10 15} box NO_BOX color 50 labeltype NO_LABEL labelfont 1 labelsize 10
+            }
+            Fl_Light_Button FlScanHistogramTgLog {
+              callback {printf("toggle\\n");}
+              tooltip {Toggle Logarithmic Representation} xywh {605 330 10 15} box NO_BOX color 50 labeltype NO_LABEL labelfont 1 labelsize 10
+            }
+          }
+          Fl_Group FlScanSetupJPEG {
+            xywh {461 220 173 129} box FLAT_BOX labeltype NO_LABEL hide
+          } {
+            Fl_Input FlScanFFmtTxQltJPEG {
+              label {JPEG image quality:}
+              callback {FlScanSliderGlue (
+        FlScanFFmtSlQltJPEG,
+        FlScanFFmtTxQltJPEG,
+        TEXT_TO_SLIDER
+    );}
+              tooltip {Quality in percent of the JPEG compressed file} xywh {465 235 35 15} type Int box THIN_DOWN_BOX labelsize 12 align 5 when 1 textsize 12
+            }
+            Fl_Slider FlScanFFmtSlQltJPEG {
+              callback {FlScanSliderGlue (
+        FlScanFFmtSlQltJPEG,
+        FlScanFFmtTxQltJPEG,
+        SLIDER_TO_TEXT
+    );}
+              tooltip {Quality in percent of the JPEG compressed file} xywh {500 235 130 15} type {Horz Knob} box THIN_DOWN_BOX labeltype NO_LABEL labelfont 1 maximum 100 step 1 value 100
+              code0 {FlScanSliderGlue(FlScanFFmtSlQltJPEG,FlScanFFmtTxQltJPEG,SLIDER_TO_TEXT);}
+            }
+            Fl_Input FlScanFFmtTxSmtJPEG {
+              label {JPEG smoothing factor:}
+              callback {FlScanSliderGlue (
+        FlScanFFmtSlSmtJPEG,
+        FlScanFFmtTxSmtJPEG,
+        TEXT_TO_SLIDER
+    );}
+              tooltip {Smoothing factor in percent of the JPEG compressed file} xywh {465 270 35 15} type Int box THIN_DOWN_BOX labelsize 12 align 5 when 1 textsize 12
+            }
+            Fl_Slider FlScanFFmtSlSmtJPEG {
+              callback {FlScanSliderGlue (
+        FlScanFFmtSlSmtJPEG,
+        FlScanFFmtTxSmtJPEG,
+        SLIDER_TO_TEXT
+    );}
+              tooltip {Smoothing factor in percent of the JPEG compressed file} xywh {500 270 130 15} type {Horz Knob} box THIN_DOWN_BOX labeltype NO_LABEL labelfont 1 maximum 100 step 1
+              code0 {FlScanSliderGlue(FlScanFFmtSlSmtJPEG,FlScanFFmtTxSmtJPEG,SLIDER_TO_TEXT);}
+            }
+            Fl_Light_Button FlScanFFmtTbOptJPEG {
+              label {JPEG optimization}
+              tooltip {Enable/disable JPEG encoding optimization} xywh {465 288 165 20} box NO_BOX value 1 labelsize 12 align 16
+            }
+            Fl_Box FlScanLbJPEGSeparator {
+              xywh {465 310 165 2} box THIN_DOWN_FRAME labeltype NO_LABEL
+            }
+            Fl_Input FlScanFFmtTxCompressionPNG {
+              label {PNG compression:}
+              callback {FlScanSliderGlue (
+        FlScanFFmtSlCompressionPNG,
+        FlScanFFmtTxCompressionPNG,
+        TEXT_TO_SLIDER
+    );}
+              tooltip {Compression factor [1-9] of the PNG compressed file} xywh {465 330 35 15} type Int box THIN_DOWN_BOX labelsize 12 align 5 when 1 textsize 12
+            }
+            Fl_Slider FlScanFFmtSlCompressionPNG {
+              callback {FlScanSliderGlue (
+        FlScanFFmtSlCompressionPNG,
+        FlScanFFmtTxCompressionPNG,
+        SLIDER_TO_TEXT
+    );}
+              tooltip {Compression factor [1-9] of the PNG compressed file} xywh {500 330 130 15} type {Horz Knob} box THIN_DOWN_BOX labeltype NO_LABEL labelfont 1 minimum 1 maximum 9 step 1 value 9
+              code0 {FlScanSliderGlue(FlScanFFmtSlCompressionPNG,FlScanFFmtTxCompressionPNG,SLIDER_TO_TEXT);}
+            }
+          }
+          Fl_Group FlScanSaneLogo {
+            image {./pixmaps/sane-logo-4.xpm} xywh {460 205 175 145} box THIN_DOWN_BOX align 17
+          } {
+            Fl_Box {} {
+              label {FlScan 1.0.2}
+              xywh {465 210 165 65} labeltype SHADOW_LABEL labelfont 1 labelsize 24 labelcolor 3
+            }
+            Fl_Box {} {
+              label {©2001-2003 by}
+              xywh {465 310 165 20} labeltype SHADOW_LABEL labelfont 1 labelcolor 3 align 16
+            }
+            Fl_Box {} {
+              label {Francesco Bradascio}
+              xywh {461 329 173 20} labeltype SHADOW_LABEL labelfont 1 labelcolor 3 align 128
+            }
+            Fl_Button showCopyright {
+              callback {if (copyrightWindow) {
+    copyrightWindow->show();
+}}
+              tooltip {Show Copyright ...} xywh {461 206 173 143} box NO_BOX labeltype NO_LABEL labelfont 1 labelcolor 7 align 210
+            }
+          }
+        }
+        Fl_Group FlScanImageSelector {open
+          xywh {460 5 175 445} box THIN_DOWN_BOX hide
+        } {
+          Fl_File_Browser FlScanFileBrowser {
+            callback {FlScanChangeDirectory();}
+            xywh {460 5 175 445} type Select box THIN_DOWN_BOX labeltype NO_LABEL
+            code0 {\#include "FL/FileBrowser.h"}
+            code1 {o->filter("*.{png|jpeg|jpg}");}
+            code2 {o->load(".");}
+            class FileBrowser
+          }
+        }
+        Fl_Progress FlScanProgressBar {
+          xywh {460 455 175 20} box THIN_DOWN_BOX color 49 selection_color 3
+        }
+      }
+      Fl_Group {} {open
+        xywh {0 0 455 480} box FLAT_BOX resizable
+      } {
+        Fl_Tabs FlScanTabs {
+          callback {if (FlScanTabs->value()==FlScanTabView) {
+    FlScanSetMode(FL_SCAN_VIEW_MODE);
+} else {
+    FlScanSetMode(FL_SCAN_SCAN_MODE);
+}}
+          xywh {5 0 450 475} resizable
+        } {
+          Fl_Group FlScanTabThumbnails {open
+            tooltip Thumbnails image {./pixmaps/Thumbnails.xpm} xywh {5 25 450 450} box UP_BOX labelfont 1 labelsize 12 hide deactivate
+          } {
+            Fl_Scroll {} {open
+              xywh {10 30 440 424} type VERTICAL_ALWAYS box DOWN_BOX color 7 labeltype NO_LABEL align 0 hide
+            } {
+              Fl_Pack FlScanThumbsRows {open
+                xywh {12 32 420 420} resizable
+              } {
+                Fl_Pack {} {open
+                  xywh {12 32 420 140} type HORIZONTAL
+                } {
+                  Fl_Group {} {
+                    label 1 open
+                    xywh {12 32 140 140} box UP_BOX labeltype SHADOW_LABEL labelfont 1 labelsize 12 labelcolor 7 align 21
+                  } {
+                    Fl_Group {} {
+                      label 1 open
+                      xywh {20 55 123 90} box DOWN_BOX color 0 labeltype NO_LABEL labelfont 1 labelsize 12 labelcolor 7 align 21
+                    } {}
+                  }
+                  Fl_Group {} {
+                    label 1 open
+                    xywh {152 32 140 140} box UP_BOX labeltype SHADOW_LABEL labelfont 1 labelsize 12 labelcolor 7 align 21
+                  } {
+                    Fl_Group {} {
+                      label 1 open
+                      xywh {160 56 123 90} box DOWN_BOX color 0 labeltype NO_LABEL labelfont 1 labelsize 12 labelcolor 7 align 21
+                    } {}
+                  }
+                  Fl_Group {} {
+                    label 1 open
+                    xywh {292 32 140 140} box UP_BOX labeltype SHADOW_LABEL labelfont 1 labelsize 12 labelcolor 7 align 21
+                  } {
+                    Fl_Group {} {open
+                      xywh {300 56 123 90} box DOWN_BOX color 0 labeltype NO_LABEL labelsize 12 align 2
+                    } {}
+                  }
+                }
+                Fl_Pack {} {open
+                  xywh {12 172 420 140} type HORIZONTAL
+                } {
+                  Fl_Group {} {
+                    label 1 open
+                    xywh {12 172 140 140} box UP_BOX labeltype SHADOW_LABEL labelfont 1 labelsize 12 labelcolor 7 align 21
+                  } {
+                    Fl_Group {} {
+                      label 1 open
+                      xywh {20 195 123 90} box DOWN_BOX color 0 labeltype NO_LABEL labelfont 1 labelsize 12 labelcolor 7 align 21
+                    } {}
+                  }
+                  Fl_Group {} {
+                    label 1 open
+                    xywh {152 172 140 140} box UP_BOX labeltype SHADOW_LABEL labelfont 1 labelsize 12 labelcolor 7 align 21
+                  } {
+                    Fl_Group {} {
+                      label 1 open
+                      xywh {160 195 123 90} box DOWN_BOX color 0 labeltype NO_LABEL labelfont 1 labelsize 12 labelcolor 7 align 21
+                    } {}
+                  }
+                  Fl_Group {} {
+                    label 1 open
+                    xywh {292 172 140 140} box UP_BOX labeltype SHADOW_LABEL labelfont 1 labelsize 12 labelcolor 7 align 21
+                  } {
+                    Fl_Group {} {open
+                      xywh {300 195 123 90} box DOWN_BOX color 0 labeltype NO_LABEL labelsize 12 align 2
+                    } {}
+                  }
+                }
+                Fl_Pack {} {open
+                  xywh {12 312 420 140} type HORIZONTAL
+                } {
+                  Fl_Group {} {
+                    label 1 open
+                    xywh {12 312 140 140} box UP_BOX labeltype SHADOW_LABEL labelfont 1 labelsize 12 labelcolor 7 align 21
+                  } {
+                    Fl_Group {} {
+                      label 1 open
+                      xywh {20 335 123 90} box DOWN_BOX color 0 labeltype NO_LABEL labelfont 1 labelsize 12 labelcolor 7 align 21
+                    } {}
+                  }
+                  Fl_Group {} {
+                    label 1 open
+                    xywh {152 312 140 140} box UP_BOX labeltype SHADOW_LABEL labelfont 1 labelsize 12 labelcolor 7 align 21
+                  } {
+                    Fl_Group {} {
+                      label 1 open
+                      xywh {160 335 123 90} box DOWN_BOX color 0 labeltype NO_LABEL labelfont 1 labelsize 12 labelcolor 7 align 21
+                    } {}
+                  }
+                  Fl_Group {} {
+                    label 1 open
+                    xywh {292 312 140 140} box UP_BOX labeltype SHADOW_LABEL labelfont 1 labelsize 12 labelcolor 7 align 21
+                  } {
+                    Fl_Group {} {open
+                      xywh {300 335 123 90} box DOWN_BOX color 0 labeltype NO_LABEL labelsize 12 align 2
+                    } {}
+                  }
+                }
+              }
+            }
+            Fl_Scroll {} {open
+              xywh {10 30 440 424} type VERTICAL_ALWAYS box DOWN_BOX color 7 labeltype NO_LABEL align 0 hide
+            } {
+              Fl_Group {} {open
+                xywh {12 32 420 420} color 7 resizable
+              } {
+                Fl_Group {} {open
+                  xywh {12 32 210 210} box UP_BOX
+                } {
+                  Fl_Group {} {open
+                    xywh {42 88 150 100} box DOWN_BOX color 0
+                  } {}
+                }
+                Fl_Group {} {open
+                  xywh {12 242 210 210} box UP_BOX
+                } {
+                  Fl_Group {} {open
+                    xywh {42 297 150 100} box DOWN_BOX color 0
+                  } {}
+                }
+                Fl_Group {} {open
+                  xywh {222 242 210 210} box UP_BOX
+                } {
+                  Fl_Group {} {open
+                    xywh {252 297 150 100} box DOWN_BOX color 0
+                  } {}
+                }
+                Fl_Group {} {open
+                  xywh {222 32 210 210} box UP_BOX
+                } {
+                  Fl_Group {} {open
+                    xywh {252 88 150 100} box DOWN_BOX color 0
+                  } {}
+                }
+                Fl_Button {} {
+                  label 99
+                  xywh {17 37 200 200} type Radio box BORDER_FRAME down_box BORDER_FRAME selection_color 0 labeltype SHADOW_LABEL labelfont 1 labelcolor 7 align 21
+                }
+                Fl_Button {} {
+                  label 99
+                  xywh {17 247 200 200} type Radio box BORDER_FRAME down_box BORDER_FRAME selection_color 0 labeltype SHADOW_LABEL labelfont 1 labelcolor 7 align 21
+                }
+                Fl_Button {} {
+                  label 99
+                  xywh {227 247 200 200} type Radio box BORDER_FRAME down_box BORDER_FRAME selection_color 0 labeltype SHADOW_LABEL labelfont 1 labelcolor 7 align 21
+                }
+                Fl_Button {} {
+                  label 99
+                  xywh {227 37 200 200} type Radio box BORDER_FRAME down_box BORDER_FRAME selection_color 0 labeltype SHADOW_LABEL labelfont 1 labelcolor 7 align 21
+                }
+              }
+            }
+            Fl_Box {} {
+              label {Foto 1/6}
+              xywh {10 455 440 15} box THIN_DOWN_BOX labelfont 1 labelsize 12 align 18
+            }
+            Fl_Group {} {open
+              xywh {10 30 440 424} box DOWN_BOX color 7 resizable
+            } {
+              Fl_Group {} {open
+                xywh {10 31 422 421} resizable
+              } {
+                Fl_Group {} {open
+                  xywh {12 32 140 140} box UP_BOX
+                } {
+                  Fl_Box {} {
+                    xywh {29 67 106 70} box THIN_DOWN_BOX labeltype NO_LABEL
+                  }
+                  Fl_Box {} {
+                    xywh {31 69 102 66} box THIN_DOWN_BOX color 0 labeltype NO_LABEL
+                  }
+                }
+                Fl_Group {} {open
+                  xywh {152 32 140 140} box UP_BOX
+                } {
+                  Fl_Box {} {
+                    xywh {169 67 106 70} box THIN_DOWN_BOX labeltype NO_LABEL
+                  }
+                  Fl_Box {} {
+                    xywh {171 69 102 66} box THIN_DOWN_BOX color 0 labeltype NO_LABEL
+                  }
+                }
+                Fl_Group {} {open
+                  xywh {292 32 140 140} box UP_BOX
+                } {
+                  Fl_Box {} {
+                    xywh {309 67 106 70} box THIN_DOWN_BOX labeltype NO_LABEL
+                  }
+                  Fl_Box {} {
+                    xywh {311 69 102 66} box THIN_DOWN_BOX color 0 labeltype NO_LABEL
+                  }
+                }
+                Fl_Group {} {open
+                  xywh {12 172 140 140} box UP_BOX
+                } {
+                  Fl_Box {} {
+                    xywh {29 207 106 70} box THIN_DOWN_BOX labeltype NO_LABEL
+                  }
+                  Fl_Box {} {
+                    xywh {31 209 102 66} box THIN_DOWN_BOX color 0 labeltype NO_LABEL
+                  }
+                }
+                Fl_Group {} {open
+                  xywh {152 172 140 140} box UP_BOX
+                } {
+                  Fl_Box {} {
+                    xywh {169 207 106 70} box THIN_DOWN_BOX labeltype NO_LABEL
+                  }
+                  Fl_Box {} {
+                    xywh {171 209 102 66} box THIN_DOWN_BOX color 0 labeltype NO_LABEL
+                  }
+                }
+                Fl_Group {} {open
+                  xywh {292 172 140 140} box UP_BOX
+                } {
+                  Fl_Box {} {
+                    xywh {309 207 106 70} box THIN_DOWN_BOX labeltype NO_LABEL
+                  }
+                  Fl_Box {} {
+                    xywh {311 209 102 66} box THIN_DOWN_BOX color 0 labeltype NO_LABEL
+                  }
+                }
+                Fl_Group {} {open
+                  xywh {12 312 140 140} box UP_BOX
+                } {
+                  Fl_Box {} {
+                    xywh {29 347 106 70} box THIN_DOWN_BOX labeltype NO_LABEL
+                  }
+                  Fl_Box {} {
+                    xywh {31 349 102 66} box THIN_DOWN_BOX color 0 labeltype NO_LABEL
+                  }
+                }
+                Fl_Group {} {open
+                  xywh {152 312 140 140} box UP_BOX
+                } {
+                  Fl_Box {} {
+                    xywh {169 347 106 70} box THIN_DOWN_BOX labeltype NO_LABEL
+                  }
+                  Fl_Box {} {
+                    xywh {171 349 102 66} box THIN_DOWN_BOX color 0 labeltype NO_LABEL
+                  }
+                }
+                Fl_Group {} {open
+                  xywh {292 312 140 140} box UP_BOX
+                } {
+                  Fl_Box {} {
+                    xywh {309 347 106 70} box THIN_DOWN_BOX labeltype NO_LABEL
+                  }
+                  Fl_Box {} {
+                    xywh {311 349 102 66} box THIN_DOWN_BOX color 0 labeltype NO_LABEL
+                  }
+                }
+                Fl_Button {} {
+                  label 99
+                  xywh {17 37 130 130} type Radio box BORDER_FRAME down_box BORDER_FRAME selection_color 0 labeltype SHADOW_LABEL labelfont 1 labelcolor 7 align 21
+                }
+                Fl_Button {} {
+                  label 99
+                  xywh {17 177 130 130} type Radio box BORDER_FRAME down_box BORDER_FRAME selection_color 0 labeltype SHADOW_LABEL labelfont 1 labelcolor 7 align 21
+                }
+                Fl_Button {} {
+                  label 99
+                  xywh {17 317 130 130} type Radio box BORDER_FRAME down_box BORDER_FRAME selection_color 0 labeltype SHADOW_LABEL labelfont 1 labelcolor 7 align 21
+                }
+                Fl_Button {} {
+                  label 99
+                  xywh {157 37 130 130} type Radio box BORDER_FRAME down_box BORDER_FRAME selection_color 0 labeltype SHADOW_LABEL labelfont 1 labelcolor 7 align 21
+                }
+                Fl_Button {} {
+                  label 99
+                  xywh {157 177 130 130} type Radio box BORDER_FRAME down_box BORDER_FRAME selection_color 0 labeltype SHADOW_LABEL labelfont 1 labelcolor 7 align 21
+                }
+                Fl_Button {} {
+                  label 99
+                  xywh {157 317 130 130} type Radio box BORDER_FRAME down_box BORDER_FRAME selection_color 0 labeltype SHADOW_LABEL labelfont 1 labelcolor 7 align 21
+                }
+                Fl_Button {} {
+                  label 99
+                  xywh {297 37 130 130} type Radio box BORDER_FRAME down_box BORDER_FRAME selection_color 0 labeltype SHADOW_LABEL labelfont 1 labelcolor 7 align 21
+                }
+                Fl_Button {} {
+                  label 99
+                  xywh {297 177 130 130} type Radio box BORDER_FRAME down_box BORDER_FRAME selection_color 0 labeltype SHADOW_LABEL labelfont 1 labelcolor 7 align 21
+                }
+                Fl_Button {} {
+                  label 99
+                  xywh {297 317 130 130} type Radio box BORDER_FRAME down_box BORDER_FRAME selection_color 0 labeltype SHADOW_LABEL labelfont 1 labelcolor 7 align 21
+                }
+              }
+              Fl_Slider {} {
+                xywh {432 32 16 420} type {Vert Knob} box FLAT_BOX color 45 minimum 1 maximum 5 step 1 slider_size 0.2
+              }
+            }
+          }
+          Fl_Group FlScanTabPreview {open
+            tooltip {Image Previewer} image {./pixmaps/Preview.xpm} xywh {5 25 450 450} box THIN_UP_BOX labelfont 1 labelsize 12
+          } {
+            Fl_Group {} {open
+              xywh {10 30 440 440} box DOWN_BOX color 7 labeltype NO_LABEL resizable
+            } {
+              Fl_Box FlScanPreviewArea {
+                callback {FlScanUpdateSelection();}
+                xywh {12 32 436 436} box FLAT_BOX color 7 labeltype NO_LABEL when 1
+                code0 {\#include <FL/Fl_Image_Preview.H>}
+                class Fl_Image_Preview
+              }
+            }
+          }
+          Fl_Group FlScanTabConversion {open
+            tooltip {Conversions Status} image {./pixmaps/file.xpm} xywh {5 25 450 450} box THIN_UP_BOX labelfont 1 labelsize 12 hide resizable
+          } {
+            Fl_Box FlScanConversionArea {
+              label {Conversions In Progress}
+              xywh {10 30 440 440} box DOWN_BOX color 7 labeltype NO_LABEL align 17 when 1 resizable
+              code0 {\#include <Conversions_List.H>}
+              class Conversions_List
+            }
+          }
+          Fl_Group FlScanTabView {open
+            tooltip {Image Viewer} image {./pixmaps/Acquire.xpm} xywh {5 25 450 450} box THIN_UP_BOX labelfont 1 labelsize 12 hide
+          } {
+            Fl_Scroll FlScanSwViewArea {open
+              xywh {10 30 440 440} box DOWN_BOX color 7 labeltype NO_LABEL resizable
+              code0 {\#include <FL/Fl_Scrolled_Image.H>}
+              class Fl_Scrolled_Image
+            } {
+              Fl_Box FlScanViewArea {
+                xywh {12 32 436 436} box FLAT_BOX color 7 labeltype NO_LABEL when 1
+                code0 {\#include <FL/Fl_Image_View.H>}
+                class Fl_Image_View
+              }
+            }
+          }
+        }
+        Fl_Group FlScanToolBar {open
+          xywh {130 0 325 25} box FLAT_BOX
+        } {
+          Fl_Box {} {
+            xywh {130 0 2 25} box THIN_DOWN_BOX labeltype NO_LABEL
+          }
+          Fl_Group FlScanPreviewTools {open
+            xywh {133 0 160 25}
+          } {
+            Fl_Button FlScanThumbnailsRotateCCW {
+              callback {FlScanPreviewArea->rotate_cw();}
+              tooltip {Rotate Clockwise} image {./pixmaps/rotate_cw90.xpm} xywh {133 0 25 25} box FLAT_BOX labelfont 1 labelsize 12 align 16
+              code0 {\#include <FL/Fl_RaiseButton.H>}
+              code1 {o->hilighted_box(FL_THIN_UP_BOX);}
+              class Fl_RaiseButton
+            }
+            Fl_Button FlScanThumbnailsRotateCW {
+              callback {FlScanPreviewArea->rotate_ccw();}
+              tooltip {Rotate Counter Clockwise} image {./pixmaps/rotate_ccw90.xpm} xywh {158 0 25 25} box FLAT_BOX labelfont 1 labelsize 12 align 16
+              code0 {\#include <FL/Fl_RaiseButton.H>}
+              code1 {o->hilighted_box(FL_THIN_UP_BOX);}
+              class Fl_RaiseButton
+            }
+            Fl_Button FlScanThumbnailsSetHorizont {
+              callback {FlScanPreviewArea->set_horizont(FlScanThumbnailsSetHorizont->value(),FlScanThumbnailsSetHorizont);}
+              tooltip {Set the horizont
+Click, drag the rubber line and release.
+The image will be rotaded by the closest
+angle of the rubber line near 0° or 90°.} image {./pixmaps/set_horizont.xpm} xywh {183 0 25 25} type Toggle box FLAT_BOX down_box THIN_DOWN_BOX selection_color 3 labelfont 1 labelsize 12 align 16 when 1
+              code0 {\#include <FL/Fl_RaiseButton.H>}
+              code1 {o->hilighted_box(FL_THIN_UP_BOX);}
+              class Fl_RaiseButton
+            }
+            Fl_Button FlScanThumbnailsUndoRotate {
+              callback {FlScanPreviewArea->undo_rotate();}
+              tooltip {Undo/Redo last rotation} image {./pixmaps/undo_rotate.xpm} xywh {208 0 25 25} box FLAT_BOX labelfont 1 labelsize 12 align 16
+              code0 {\#include <FL/Fl_RaiseButton.H>}
+              code1 {o->hilighted_box(FL_THIN_UP_BOX);}
+              class Fl_RaiseButton
+            }
+            Fl_Box {} {
+              xywh {235 0 2 25} box THIN_DOWN_BOX labeltype NO_LABEL
+            }
+            Fl_Button FlScanThumbnailsHorizontalMirror {
+              callback {FlScanPreviewArea->flip_horizontal();}
+              tooltip {Flip Horizontal} image {./pixmaps/horizontal_mirror.xpm} xywh {238 0 25 25} box FLAT_BOX labelfont 1 labelsize 12 align 16
+              code0 {\#include <FL/Fl_RaiseButton.H>}
+              code1 {o->hilighted_box(FL_THIN_UP_BOX);}
+              class Fl_RaiseButton
+            }
+            Fl_Button FlScanThumbnailsVerticalMirror {
+              callback {FlScanPreviewArea->flip_vertical();}
+              tooltip {Flip Vertical} image {./pixmaps/vertical_mirror.xpm} xywh {263 0 25 25} box FLAT_BOX labelfont 1 labelsize 12 align 16
+              code0 {\#include <FL/Fl_RaiseButton.H>}
+              code1 {o->hilighted_box(FL_THIN_UP_BOX);}
+              class Fl_RaiseButton
+            }
+            Fl_Box {} {
+              xywh {290 0 2 25} box THIN_DOWN_BOX labeltype NO_LABEL
+            }
+          }
+          Fl_Box {} {
+            xywh {295 0 10 25} labeltype NO_LABEL resizable
+          }
+          Fl_Button FlScanPreviewZoomPlus {
+            callback {FlScanResize(INCREASE_SIZE);}
+            tooltip {Increase Window Size} image {./pixmaps/zoom_in.xpm} xywh {330 0 25 25} box FLAT_BOX labelfont 1 labelsize 12 align 16
+            code0 {\#include <FL/Fl_RaiseButton.H>}
+            code1 {o->hilighted_box(FL_THIN_UP_BOX);}
+            class Fl_RaiseButton
+          }
+          Fl_Button FlScanPreviewZoomMinus {
+            callback {FlScanResize(DECREASE_SIZE);}
+            tooltip {Decrease Window Size} image {./pixmaps/zoom_out.xpm} xywh {355 0 25 25} box FLAT_BOX labelfont 1 labelsize 12 align 16
+            code0 {\#include <FL/Fl_RaiseButton.H>}
+            code1 {o->hilighted_box(FL_THIN_UP_BOX);}
+            class Fl_RaiseButton
+          }
+          Fl_Button FlScanPreviewZoomScreen {
+            callback {FlScanResize(FIT_TO_SCREEN);}
+            tooltip {Fit Window Size to Screen Size} image {./pixmaps/zoom_undo.xpm} xywh {380 0 25 25} box FLAT_BOX labelfont 1 labelsize 12 align 16
+            code0 {\#include <FL/Fl_RaiseButton.H>}
+            code1 {o->hilighted_box(FL_THIN_UP_BOX);}
+            class Fl_RaiseButton
+          }
+          Fl_Button FlScanPreviewZoomMinimize {
+            callback {FlScanResize(0);}
+            tooltip {Resize Window to Minimum Size} image {./pixmaps/zoom_mini.xpm} xywh {405 0 25 25} box FLAT_BOX labelfont 1 labelsize 12 align 16
+            code0 {\#include <FL/Fl_RaiseButton.H>}
+            code1 {o->hilighted_box(FL_THIN_UP_BOX);}
+            class Fl_RaiseButton
+          }
+          Fl_Button FlScanPbExit {
+            callback {if (FlScanCheckForImagesNotSaved()) {
+    FlScanSaveSettings();
+    FlScanSaveCurrentDevice();
+    delete sane;
+    exit(0);
+}}
+            tooltip {Terminate Fl Scan} image {./pixmaps/zoom_quit.xpm} xywh {430 0 25 25} box FLAT_BOX labelfont 1 labelsize 12 align 16
+            code0 {\#include <FL/Fl_RaiseButton.H>}
+            code1 {o->hilighted_box(FL_THIN_UP_BOX);}
+            class Fl_RaiseButton
+          }
+          Fl_Button FlScanShowCopyright {
+            label {©}
+            callback {if (copyrightWindow) {
+    copyrightWindow->show();
+}}
+            tooltip {Show Copyright...} xywh {305 0 25 25} box FLAT_BOX labelfont 1 labelsize 24 align 208
+            code0 {\#include <FL/Fl_RaiseButton.H>}
+            code1 {o->hilighted_box(FL_THIN_UP_BOX);}
+            class Fl_RaiseButton
+          }
+        }
+        Fl_Box FlScanEeLockView {
+          xywh {5 0 125 25} labeltype NO_LABEL hide
+          class EatEvent
+        }
+      }
+      Fl_Box FlScanEeWaitForSaving {
+        label {Wait for Saving Completion}
+        xywh {0 0 640 480} labeltype SHADOW_LABEL labelfont 1 labelsize 30 labelcolor 3 align 16 hide
+        class EatEvent
+      }
+    }
+  }
+  code {if (!enable_scan) {
+    FlScanTabThumbnails->deactivate();
+    FlScanTabPreview->deactivate();
+    FlScanTabConversion->deactivate();
+    FlScanTabs->push(0);
+    FlScanTabs->value(FlScanTabView);
+    FlScanTabs->do_callback();
+    FlScanSwViewArea->activate();
+    FlScanEeLockView->set_visible();
+}
+lastOption=FlScanSaneLogo;
+update_tree();} {}
+} 
+
+Function {FlScanSetMode(int mode)} {open return_type void
+} {
+  code {if (mode==FL_SCAN_SCAN_MODE) {
+    FlScanImageSelector->hide();
+    FlScanScannerOptions->show();
+    FlScanSettings->show();
+    FlScanSetOption->show();
+    FlScanPreviewTools->show();
+} else {
+    FlScanScannerOptions->hide();
+    FlScanSettings->hide();
+    FlScanSetOption->hide();
+    FlScanPreviewTools->hide();
+    FlScanImageSelector->show();
+}} {}
+} 
+
+Function {FlScanSliderGlue(Fl_Valuator *slider, Fl_Input *text,bool textToSlider)} {open return_type void
+} {
+  code {double val, cval;
+char *ptr, str[256];
+
+    if (text && slider) {
+        if (textToSlider) {
+            ptr=(char *)text->value();
+            if (ptr) {
+                val = atof(ptr);
+                cval = slider->clamp(val);
+                slider->value(cval);
+                if (cval!=val) {
+                    slider->format(str);
+                    text->value((const char *)str);
+                }
+            }
+        } else {
+            slider->format(str);
+            text->value((const char *)str);
+        }
+    }} {}
+} 
+
+Function {FlScanResize(int how)} {open return_type void
+} {
+  code {static int hh[] = { 530, 600, 768, 864, 1024 };
+static int res=0;
+static int maxres=-1;
+int reqres;
+int numres;
+
+numres=(sizeof(hh)/sizeof(int))-1;
+
+if (maxres<0) {
+    if (Fl::h()<=hh[0]) {
+        maxres=0;
+    } else if (Fl::h()>=hh[numres]) {
+        maxres=numres;
+    } else {
+        for (int i=0; i<numres; i++) {
+            if (Fl::h()==hh[i]) {
+                maxres=i;
+                break;
+            } else if (
+                Fl::h()>hh[i] &&
+                Fl::h()<hh[i+1]
+            ) {
+                maxres=i;
+                break;
+            }
+        }
+    }
+}
+if (how==DECREASE_SIZE && res>0) {
+    reqres=res-1;
+} else if (how==INCREASE_SIZE && res<maxres) {
+    reqres=res+1;
+} else if (how==FIT_TO_SCREEN) {
+    reqres=maxres;
+} else {
+    reqres=how;
+}
+if (reqres>=0) {
+    reqres=(reqres<0)?0:(reqres>maxres)?maxres:reqres;
+    if (reqres!=res) {
+        res=reqres;
+        FlScan->resize (
+            FlScan->x(), FlScan->y(),
+            hh[res]+110, hh[res]-50
+        );
+        FlScanContainer->resize(0,0,hh[res]+110,hh[res]-50);
+        FlScanToolBar->resize(130,0,hh[res]-205,25);
+        FlScanEeLockView->resize(5,0,125,26);
+        FlScanEeWaitForSaving->resize(0,0,hh[res]+110,hh[res]-50);
+    }
+}} {}
+} 
+
+Function {cb_selectoption(Fl_Widget *w, void *v)} {open return_type void
+} {
+  code {SANE_Int opt_num;
+Fl_Tree_Browser* tree = (Fl_Tree_Browser*)w;
+C_Sane_Option *opt;
+
+    if (tree->selected()) {
+        opt_num = (SANE_Int)((Fl_Tree_Item*)(tree->selected()))->data();
+
+        tree->redraw();
+        Fl::flush();
+
+        if (opt_num>0) {
+            opt = sane->option(opt_num);
+            if (opt && opt->descriptor()) {
+                if (opt_num != currentOption_num) {
+                    currentOption_num = opt_num;
+                    currentOption=opt;
+                    FlScanSelOption();
+                }
+            } else {
+                tree->deselect();
+                tree->redraw();
+                FlScanScannerOptions->damage(FL_DAMAGE_ALL);
+                FlScanScannerOptions->redraw();
+                Fl::flush();
+            }
+        } else if (opt_num<=0) { /* Other stuff */
+            currentOption=(C_Sane_Option*)0;
+            currentOption_num = opt_num;
+            FlScanSelOption();
+        }
+    } else {
+        currentOption=(C_Sane_Option*)0;
+        currentOption_num = 0;
+        FlScanSelOption();
+    }} {}
+} 
+
+Function {update_tree()} {open return_type void
+} {
+  code {int i;
+int x,y;
+int firstItem = 1;
+int rows = 0;
+Fl_Tree_Item *application = 0;
+Fl_Tree_Item *scanner = 0;
+Fl_Tree_Item *first = 0;
+Fl_Tree_Item *group = 0;
+Fl_Tree_Item *item = 0;
+
+    preview_ndx=-1;
+    tl_x_ndx=-1;
+    tl_y_ndx=-1;
+    br_x_ndx=-1;
+    br_y_ndx=-1;
+
+    FlScanScannerOptions->clear();
+    FlScanScannerOptions->has_scrollbar(Fl_Browser_::BOTH);
+    FlScanScannerOptions->draw_lines(false);
+    FlScanScannerOptions->pixmap_offset(16);
+    FlScanScannerOptions->label_offset(0);
+    /*
+     * fill tree
+     */
+    rows++;
+    application = first = new Fl_Tree_Item (
+        /* label     : */ "Application Settings",
+        /* pixmap    : */ 0,
+        /* tooltip   : */ 0,
+        /* data      : */ 0,
+        /* color     : */ FlScanScannerOptions->textcolor(),
+        /* font      : */ FlScanScannerOptions->textfont()+1,
+        /* font_size : */ FlScanScannerOptions->textsize(),
+        /* can_open  : */ true,
+        /* opened    : */ true,
+        /* parent    : */ FlScanScannerOptions,
+        /* father    : */ 0,
+        /* prev      : */ 0,
+        /* next      : */ 0
+    );
+        rows++;
+        group = new Fl_Tree_Item (
+            /* label     : */ "Output file resolutions",
+            /* pixmap    : */ 0,
+            /* tooltip   : */ 0,
+            /* data      : */ (void*)FL_SCAN_OUTPUT_FILE_RESOLUTION,
+            /* color     : */ FlScanScannerOptions->textcolor(),
+            /* font      : */ FlScanScannerOptions->textfont(),
+            /* font_size : */ FlScanScannerOptions->textsize(),
+            /* can_open  : */ false,
+            /* opened    : */ true,
+            /* parent    : */ FlScanScannerOptions,
+            /* father    : */ application,
+            /* prev      : */ 0,
+            /* next      : */ 0
+        );
+        rows++;
+        group = new Fl_Tree_Item (
+            /* label     : */ "Image Convertes Settings",
+            /* pixmap    : */ 0,
+            /* tooltip   : */ 0,
+            /* data      : */ (void*)FL_SCAN_CONVERTERS_SETTINGS,
+            /* color     : */ FlScanScannerOptions->textcolor(),
+            /* font      : */ FlScanScannerOptions->textfont(),
+            /* font_size : */ FlScanScannerOptions->textsize(),
+            /* can_open  : */ false,
+            /* opened    : */ true,
+            /* parent    : */ FlScanScannerOptions,
+            /* father    : */ application,
+            /* prev      : */ group,
+            /* next      : */ 0
+        );
+    rows++;
+    scanner = new Fl_Tree_Item (
+        /* label     : */ "Scanner Settings",
+        /* pixmap    : */ 0,
+        /* tooltip   : */ 0,
+        /* data      : */ 0,
+        /* color     : */ FlScanScannerOptions->textcolor(),
+        /* font      : */ FlScanScannerOptions->textfont()+1,
+        /* font_size : */ FlScanScannerOptions->textsize(),
+        /* can_open  : */ true,
+        /* opened    : */ true,
+        /* parent    : */ FlScanScannerOptions,
+        /* father    : */ 0,
+        /* prev      : */ application,
+        /* next      : */ 0
+    );
+    group = 0;
+\#if 0
+        rows++;
+        group = new Fl_Tree_Item (
+            /* label     : */ "Device Selection",
+            /* pixmap    : */ 0,
+            /* tooltip   : */ 0,
+            /* data      : */ 0,
+            /* color     : */ FlScanScannerOptions->textcolor(),
+            /* font      : */ FlScanScannerOptions->textfont(),
+            /* font_size : */ FlScanScannerOptions->textsize(),
+            /* can_open  : */ false,
+            /* opened    : */ true,
+            /* parent    : */ FlScanScannerOptions,
+            /* father    : */ scanner,
+            /* prev      : */ 0,
+            /* next      : */ 0
+        );
+            rows++;
+            item = new Fl_Tree_Item (
+                /* label     : */ "Device",
+                /* pixmap    : */ 0,
+                /* tooltip   : */ 0,
+                /* data      : */ (void*)FL_SCAN_DEVICE_SELECTION,
+                /* color     : */ FlScanScannerOptions->textcolor(),
+                /* font      : */ FlScanScannerOptions->textfont(),
+                /* font_size : */ FlScanScannerOptions->textsize(),
+                /* can_open  : */ false,
+                /* opened    : */ true,
+                /* parent    : */ FlScanScannerOptions,
+                /* father    : */ group,
+                /* prev      : */ 0,
+                /* next      : */ 0
+            );
+\#endif
+    C_Sane_Option *opt;
+    for (i=1;i<sane->num_options() && (opt=sane->option(i));i++) {
+        const SANE_Option_Descriptor *sod = opt->descriptor();
+        if (sod && sod->title && strlen(sod->title)) {
+            if (sod->type==SANE_TYPE_GROUP) {
+                if (!firstItem && !item && group) {
+                    /*
+                     * The previous group is empty, remove it
+                     */
+                    Fl_Tree_Item *prev = group->prev();
+                    if (prev) {
+                        prev->next(0);
+                    }
+                    Fl_Tree_Item *father = group->father();
+                    if (father && father->childs() == group) {
+                        father->childs(0);
+                    }
+                    group = prev;
+                    rows--;
+                }
+                group = new Fl_Tree_Item (
+                    /* label     : */ (char*)sod->title,
+                    /* pixmap    : */ 0,
+                    /* tooltip   : */ (char*)sod->desc,
+                    /* data      : */ 0,
+                    /* color     : */ FlScanScannerOptions->textcolor(),
+                    /* font      : */ FlScanScannerOptions->textfont(),
+                    /* font_size : */ FlScanScannerOptions->textsize(),
+                    /* can_open  : */ false,
+                    /* opened    : */ true,
+                    /* parent    : */ FlScanScannerOptions,
+                    /* father    : */ scanner,
+                    /* prev      : */ group,
+                    /* next      : */ 0
+                );
+                rows++;
+                item = 0;
+\#if 0
+            } else if (SANE_OPTION_IS_ACTIVE(sod->cap)) {
+                if (!strcmp(sod->name,SANE_NAME_PREVIEW)) {
+                    preview_ndx=i;
+                } else if (!strcmp(sod->name,SANE_NAME_SCAN_TL_X)) {
+                    tl_x_ndx=i;
+                } else if (!strcmp(sod->name,SANE_NAME_SCAN_TL_Y)) {
+                    tl_y_ndx=i;
+                } else if (!strcmp(sod->name,SANE_NAME_SCAN_BR_X)) {
+                    br_x_ndx=i;
+                } else if (!strcmp(sod->name,SANE_NAME_SCAN_BR_Y)) {
+                    br_y_ndx=i;
+                } else {
+                    item = new Fl_Tree_Item (
+                        /* label     : */ (char*)sod->title,
+                        /* pixmap    : */ 0,
+                        /* tooltip   : */ (char*)sod->desc,
+                        /* data      : */ (void*)opt->number(),
+                        /* color     : */ FlScanScannerOptions->textcolor(),
+                        /* font      : */ FlScanScannerOptions->textfont(),
+                        /* font_size : */ FlScanScannerOptions->textsize(),
+                        /* can_open  : */ false,
+                        /* opened    : */ true,
+                        /* parent    : */ FlScanScannerOptions,
+                        /* father    : */ (group) ? group : scanner,
+                        /* prev      : */ item,
+                        /* next      : */ 0
+                    );
+                    firstItem = 0;
+                    rows++;
+                }
+\#else
+            } else if (sod->title) {
+                if (!strcmp(sod->name,SANE_NAME_PREVIEW)) {
+                    preview_ndx=i;
+                } else if (!strcmp(sod->name,SANE_NAME_SCAN_TL_X)) {
+                    tl_x_ndx=i;
+                } else if (!strcmp(sod->name,SANE_NAME_SCAN_TL_Y)) {
+                    tl_y_ndx=i;
+                } else if (!strcmp(sod->name,SANE_NAME_SCAN_BR_X)) {
+                    br_x_ndx=i;
+                } else if (!strcmp(sod->name,SANE_NAME_SCAN_BR_Y)) {
+                    br_y_ndx=i;
+                }
+                item = new Fl_Tree_Item (
+                    /* label     : */ (char*)sod->title,
+                    /* pixmap    : */ 0,
+                    /* tooltip   : */ (char*)sod->desc,
+                    /* data      : */ (void*)opt->number(),
+                    /* color     : */ FlScanScannerOptions->textcolor(),
+                    /* font      : */ FlScanScannerOptions->textfont(),
+                    /* font_size : */ FlScanScannerOptions->textsize(),
+                    /* can_open  : */ false,
+                    /* opened    : */ true,
+                    /* parent    : */ FlScanScannerOptions,
+                    /* father    : */ (group) ? group : scanner,
+                    /* prev      : */ item,
+                    /* next      : */ 0
+                );
+                firstItem = 0;
+                rows++;
+\#endif
+            }
+        }
+    }
+    FlScanScannerOptions->items(first);
+    /*
+     * Show the tree
+     */
+    FlScanScannerOptions->damage(FL_DAMAGE_ALL);
+    FlScanScannerOptions->redraw();
+    Fl::flush();} {}
+} 
+
+Function {FlScanSaneSetCB(bool automatic)} {open return_type void
+} {
+  code {void *optval;
+bool to_be_freed=false;
+bool ok_to_set=false;
+double dval;
+SANE_Int val;
+const SANE_Option_Descriptor *sod;
+
+    optval=0;
+    if (currentOption) {
+        /*
+         * Get the value from the interface
+         */
+        sod = currentOption->descriptor();
+        switch (sod->type) {
+            case SANE_TYPE_BOOL:
+                if (
+                    sod->size==sizeof(SANE_Word) &&
+                    sod->constraint_type==SANE_CONSTRAINT_NONE
+                ) {
+                    ok_to_set=true;
+                    val=FlScanTbBoolType->value();
+                    optval=(void*)&val;
+                }
+                break;
+            case SANE_TYPE_INT:
+                if (sod->size==sizeof(SANE_Word)) {
+                    switch (sod->constraint_type) {
+                        case SANE_CONSTRAINT_NONE:
+                            sscanf (
+                                FlScanTxIntType->value(),
+                                "%d",
+                                &val
+                            );
+                            ok_to_set=true;
+                            optval=(void*)&val;
+                            break;
+                        case SANE_CONSTRAINT_RANGE:
+                            ok_to_set=true;
+                            val=(int)FlScanViRangeType->value();
+                            optval=(void*)&val;
+                            break;
+                        case SANE_CONSTRAINT_WORD_LIST:
+                            sscanf (
+                                FlScanMnListType->text (
+                                    FlScanMnListType->value()
+                                ),
+                                "%d",
+                                &val
+                            );
+                            ok_to_set=true;
+                            optval=(void*)&val;
+                            break;
+                         default:
+                            break;
+                    }
+                } else { /* table or array */
+                    int size=sod->size/sizeof(SANE_Word);
+                    double *vector=new double[size];
+                    SANE_Int *ivect=new SANE_Int[size];
+                    if (vector && ivect) {
+                        FlScanTableGammaCurve->get_vector(size,vector);
+                        for (int i=0;i<size;i++) {
+                            ivect[i]=(int)vector[i];
+                        }
+                        to_be_freed=true;
+                        ok_to_set=true;
+                        optval=(void*)ivect;
+                    }
+                    if (vector) {
+                        delete vector;
+                    }
+                }
+                break;
+            case SANE_TYPE_FIXED:
+                if (sod->size==sizeof(SANE_Word)) {
+                    switch (sod->constraint_type) {
+                        case SANE_CONSTRAINT_NONE:
+                            sscanf (
+                                FlScanTxFixedType->value(),
+                                "%lf",
+                                &dval
+                            );
+                            val=(SANE_Int)SANE_FIX(dval);
+                            ok_to_set=true;
+                            optval=(void*)&val;
+                            break;
+                        case SANE_CONSTRAINT_RANGE:
+                            val=(int)SANE_FIX(FlScanViRangeType->value());
+                            ok_to_set=true;
+                            optval=(void*)&val;
+                            break;
+                         default:
+                            break;
+                    }
+                } else { /* table or array */
+                    int size=sod->size/sizeof(SANE_Word);
+                    double *vector=new double[size];
+                    SANE_Int *ivect=new SANE_Int[size];
+                    if (vector && ivect) {
+                        FlScanTableGammaCurve->get_vector(size,vector);
+                        for (int i=0;i<size;i++) {
+                            ivect[i]=(int)SANE_FIX(vector[i]);
+                        }
+                        to_be_freed=true;
+                        ok_to_set=true;
+                        optval=(void*)ivect;
+                    }
+                    if (vector) {
+                        delete vector;
+                    }
+                }
+                break;
+            case SANE_TYPE_STRING:
+                switch (sod->constraint_type) {
+                    case SANE_CONSTRAINT_NONE:
+                        ok_to_set=true;
+                        optval=(void*)FlScanTxStringType->value();
+                        break;
+                    case SANE_CONSTRAINT_STRING_LIST:
+                        FlScanMnListType->value();
+                        ok_to_set=true;
+                        optval=(void*)FlScanMnListType->text (
+                            FlScanMnListType->value()
+                        );
+                        break;
+                    default:
+                        break;
+                }
+                break;
+            case SANE_TYPE_BUTTON:
+                ok_to_set=true;
+                optval=(void*)0;
+                break;
+            default:
+                break;
+        }
+        /*
+         * Set the SANE value
+         */
+        if (automatic) {
+            currentOption->auto_value(optval);
+        } else {
+            currentOption->value(optval);
+        }
+        if (currentOption->status()==SANE_STATUS_GOOD) {
+            if (currentOption->status()==SANE_INFO_RELOAD_OPTIONS) {
+                update_tree();
+            }
+\#if 0
+            if (currentOption->status()==SANE_INFO_RELOAD_PARAMS) {
+                get_params(sane);
+            }
+\#endif
+            if (currentOption->status()==SANE_INFO_INEXACT) {
+//                fprintf(stderr,"\\nInexact Value for %s\\n",optname);
+            }
+            C_Sane_Option *opt = sane->option(currentOption_num);
+            if (opt && opt->descriptor()) {
+                currentOption=opt;
+                FlScanSelOption();
+            }
+        } else {
+/*
+            fprintf (
+                stderr,
+                "\\n%s [%s]\\n",
+                (SANE_String_Const)currentOption->status(),
+                optname
+            );
+*/
+        }
+        if (to_be_freed) {
+            delete (int *)optval;
+        }
+    }} {}
+} 
+
+Function {FlScanSelOption()} {open return_type void
+} {
+  code {int i,d;
+char *curdevice=0,*message=0;
+Fl_Group *group=0;
+C_Sane_Value val;
+static char buff[256];
+\#define INVALID_FORMAT "Invalid Format"
+\#define NOT_YET_IMPLEMENTED "Tables and Arrays\\nare not yet implemented"
+
+    if (currentOption) {
+        const SANE_Option_Descriptor *sod = currentOption->descriptor();
+        FlScanPbAutoOption->hide();
+        if (sod->cap & SANE_CAP_AUTOMATIC) {
+            FlScanPbAutoOption->show();
+        }
+        val=currentOption->value();
+        switch (sod->type) {
+            case SANE_TYPE_BOOL:
+                if (sod->size==sizeof(SANE_Word)) {
+                    switch (sod->constraint_type) {
+                        case SANE_CONSTRAINT_NONE:
+                            group=FlScanBoolGroup;
+                            FlScanTbBoolType->value((bool)val);
+                            FlScanTbBoolType->label(currentOption->string_value());
+                            break;
+                        case SANE_CONSTRAINT_RANGE:
+                        case SANE_CONSTRAINT_WORD_LIST:
+                        case SANE_CONSTRAINT_STRING_LIST:
+                        default:
+                            message=INVALID_FORMAT;
+                            break;
+                    }
+                } else { /* table or array */
+                    message=INVALID_FORMAT;
+                }
+                break;
+            case SANE_TYPE_INT:
+                if (sod->size==sizeof(SANE_Word)) {
+                    switch (sod->constraint_type) {
+                        case SANE_CONSTRAINT_NONE:
+                            group=FlScanIntGroup;
+                            FlScanTxIntType->value (
+                                (char*)currentOption->string_value()
+                            );
+                            break;
+                        case SANE_CONSTRAINT_RANGE:
+                            group=FlScanRangeGroup;
+                            FlScanViRangeType->value((double)((int)val));
+                            FlScanViRangeType->minimum (
+                                (double)sod->constraint.range->min
+                            );
+                            FlScanViRangeType->maximum (
+                                (double)sod->constraint.range->max
+                            );
+                            FlScanViRangeType->step (
+                                (double)sod->constraint.range->quant
+                            );
+                            FlScanSlRangeType->value((double)((int)val));
+                            FlScanSlRangeType->minimum (
+                                (double)sod->constraint.range->min
+                            );
+                            FlScanSlRangeType->maximum (
+                                (double)sod->constraint.range->max
+                            );
+                            FlScanSlRangeType->step (
+                                (double)sod->constraint.range->quant
+                            );
+                            break;
+                        case SANE_CONSTRAINT_WORD_LIST:
+                            group=FlScanListGroup;
+                            FlScanMnListType->clear();
+                            for (d=0,i=1;i<=sod->constraint.word_list[0];i++) {
+                                sprintf(buff,"%d",sod->constraint.word_list[i]);
+                                FlScanMnListType->add (
+                                    FlScanMenuize(buff),
+                                    0,
+                                    (Fl_Callback *)FlScanChoiceCB,
+                                    (void*)0
+                                );
+                                if ((int)val==sod->constraint.word_list[i]) {
+                                    d=i-1;
+                                }
+                            }
+                            FlScanMnListType->value(d);
+                            break;
+                        case SANE_CONSTRAINT_STRING_LIST:
+                        default:
+                            message=INVALID_FORMAT;
+                            break;
+                    }
+                } else { /* table or array */
+                    int size=sod->size/sizeof(SANE_Word);
+                    double *vector=new double[size];
+                    if (vector) {
+                        group=FlScanTableGroup;
+                        switch (sod->constraint_type) {
+                            case SANE_CONSTRAINT_RANGE:
+                                FlScanTableGammaCurve->bounds (
+                                    (double)0,
+                                    (double)sod->constraint.range->min,
+                                    (double)(size-1),
+                                    (double)sod->constraint.range->max
+                                );
+                                break;
+                            case SANE_CONSTRAINT_WORD_LIST: {
+                                double min, max, v;
+                                    if (sod->constraint.word_list[0]>1) {
+                                        max=(double)sod->constraint.word_list[1];
+                                        min=max;
+                                        for (
+                                            i=2;
+                                            i<sod->constraint.word_list[0];
+                                            i++
+                                        ) {
+                                            v=(double)sod->constraint.word_list[i];
+                                            if (v<min) {
+                                                min=v;
+                                            }
+                                            if (v>max) {
+                                                max=v;
+                                            }
+                                        }
+                                    } else {
+                                        min=max=0;
+                                    }
+                                    if (min==max) {
+                                        message=INVALID_FORMAT;
+                                        group=0;
+                                    } else {
+                                        FlScanTableGammaCurve->bounds (
+                                            (double)0,
+                                            min,
+                                            (double)(size-1),
+                                            max
+                                        );
+                                    }
+                                }
+                                break;
+                            case SANE_CONSTRAINT_NONE:
+                            case SANE_CONSTRAINT_STRING_LIST:
+                            default:
+                                message=INVALID_FORMAT;
+                                break;
+                        }
+                        if (group) {
+                            SANE_Int *pval=(SANE_Int*)((void*)val);
+                            for (i=0;i<size;i++) {
+                                vector[i]=(double)pval[i];
+                            }
+                            FlScanTableGammaCurve->set_vector(size,vector);                            
+                        }
+                        delete vector;
+                    } else {
+                        message=INVALID_FORMAT;
+                    }
+                }
+                break;
+            case SANE_TYPE_FIXED:
+                if (sod->size==sizeof(SANE_Word)) {
+                    switch (sod->constraint_type) {
+                        case SANE_CONSTRAINT_NONE:
+                            group=FlScanFixedGroup;
+                            FlScanTxFixedType->value (
+                                (char*)currentOption->string_value()
+                            );
+                            break;
+                        case SANE_CONSTRAINT_RANGE:
+                            group=FlScanRangeGroup;
+                            FlScanViRangeType->value((double)val);
+                            FlScanViRangeType->minimum (
+                                (double)SANE_UNFIX(sod->constraint.range->min)
+                            );
+                            FlScanViRangeType->maximum (
+                                (double)SANE_UNFIX(sod->constraint.range->max)
+                            );
+                            FlScanViRangeType->step (
+                                (double)SANE_UNFIX(sod->constraint.range->quant)
+                            );
+                            FlScanSlRangeType->value((double)val);
+                            FlScanSlRangeType->minimum (
+                                (double)SANE_UNFIX(sod->constraint.range->min)
+                            );
+                            FlScanSlRangeType->maximum (
+                                (double)SANE_UNFIX(sod->constraint.range->max)
+                            );
+                            FlScanSlRangeType->step (
+                                (double)SANE_UNFIX(sod->constraint.range->quant)
+                            );
+                            break;
+                        case SANE_CONSTRAINT_WORD_LIST:
+                        case SANE_CONSTRAINT_STRING_LIST:
+                        default:
+                            message=INVALID_FORMAT;
+                            break;
+                    }
+                } else { /* table or array */
+                    int size=sod->size/sizeof(SANE_Word);
+                    double *vector=new double[size];
+                    if (vector) {
+                        group=FlScanTableGroup;
+                        switch (sod->constraint_type) {
+                            case SANE_CONSTRAINT_RANGE:
+                                FlScanTableGammaCurve->bounds (
+                                    (double)0,
+                                    (double)SANE_UNFIX(sod->constraint.range->min),
+                                    (double)(size-1),
+                                    (double)SANE_UNFIX(sod->constraint.range->max)
+                                );
+                                break;
+                            case SANE_CONSTRAINT_WORD_LIST: {
+                                double min, max, val;
+                                    if (sod->constraint.word_list[0]>1) {
+                                        min=max=(double)SANE_UNFIX (
+                                            sod->constraint.word_list[1]
+                                        );
+                                        for (
+                                            i=2;
+                                            i<sod->constraint.word_list[0];
+                                            i++
+                                        ) {
+                                            val=(double)SANE_UNFIX (
+                                                sod->constraint.word_list[i]
+                                            );
+                                            if (val<min) {
+                                                min=val;
+                                            }
+                                            if (val>max) {
+                                                max=val;
+                                            }
+                                        }
+                                    } else {
+                                        min=max=0;
+                                    }
+                                    if (min==max) {
+                                        message=INVALID_FORMAT;
+                                        group=0;
+                                    } else {
+                                        FlScanTableGammaCurve->bounds (
+                                            (double)0,
+                                            min,
+                                            (double)(size-1),
+                                            max
+                                        );
+                                    }
+                                }
+                                break;
+                            case SANE_CONSTRAINT_NONE:
+                            case SANE_CONSTRAINT_STRING_LIST:
+                            default:
+                                message=INVALID_FORMAT;
+                                break;
+                        }
+                        if (group) {
+                            SANE_Int *pval=(SANE_Int*)((void*)val);
+                            for (i=0;i<size;i++) {
+                                vector[i]=(double)SANE_UNFIX(pval[i]);
+                            }
+                            FlScanTableGammaCurve->set_vector(size,vector);                            
+                        }
+                        delete vector;
+                    } else {
+                        message=INVALID_FORMAT;
+                    }
+                }
+                break;
+            case SANE_TYPE_STRING:
+                switch (sod->constraint_type) {
+                    case SANE_CONSTRAINT_NONE:
+                        group=FlScanStringGroup;
+                        FlScanTxStringType->value((char*)val);
+                        break;
+                    case SANE_CONSTRAINT_STRING_LIST:
+                        group=FlScanListGroup;
+                        FlScanMnListType->clear();
+                        for (d=0,i=0;sod->constraint.string_list[i];i++) {
+                            FlScanMnListType->add (
+                                FlScanMenuize(sod->constraint.string_list[i]),
+                                0,
+                                (Fl_Callback *)FlScanChoiceCB,
+                                (void*)0
+                            );
+                            if (!strcmp((char*)val,sod->constraint.string_list[i])) {
+                                d=i;
+                            }
+                        }
+                        FlScanMnListType->value(d);
+                        break;
+                    case SANE_CONSTRAINT_RANGE:
+                    case SANE_CONSTRAINT_WORD_LIST:
+                    default:
+                        message=INVALID_FORMAT;
+                        break;
+                }
+                break;
+            case SANE_TYPE_BUTTON:
+                group=FlScanButtonGroup;
+                break;
+            default:
+                group=0;
+                break;
+        }
+        FlScanPbSetOption->hide();
+        if (sod->unit==SANE_UNIT_NONE) {
+            strcpy(buff,sod->title);
+        } else {
+            sprintf (
+                buff,
+                "%s [%s]",
+                sod->title,
+                (sod->unit==SANE_UNIT_PIXEL      ) ? "pixel" :
+                (sod->unit==SANE_UNIT_BIT        ) ? "bit"   :
+                (sod->unit==SANE_UNIT_DPI        ) ? "dpi"   :
+                (sod->unit==SANE_UNIT_PERCENT    ) ? "%"     :
+                (sod->unit==SANE_UNIT_MM         ) ? "mm"    :
+                (sod->unit==SANE_UNIT_MICROSECOND) ? "\\256s" : "none"
+            );
+        }
+        if (group) {
+            FlScanShowOption(group,buff,sod->desc);
+        } else {
+            FlScanMessage->label(message);
+            FlScanShowOption(FlScanMessage,buff,(char*)0);
+        }
+    } else { /* Device Selection */
+        switch (currentOption_num) {
+            case FL_SCAN_DEVICE_SELECTION:
+                FlScanMnListType->clear();
+                d=0;
+                if (sane->device() && sane->device()->name) {
+                    curdevice=strdup(sane->device()->name);
+                }
+                for (i=0;i<sane->num_devices() && sane->device(i);i++) {
+                    FlScanMnListType->add (
+                        FlScanMenuize(sane->device(i)->name),
+                        0,
+                        (Fl_Callback *)FlScanChoiceCB,
+                        (void*)sane->device(i)
+                    );
+                    if (
+                        curdevice && 
+                        sane->device(i)->name &&
+                        !strcmp(sane->device(i)->name,curdevice)
+                    ) {
+                        d=i;
+                    }
+                }
+                FlScanMnListType->value(d);
+                FlScanShowOption(FlScanListGroup,"Device","Select a device");
+                break;
+            case FL_SCAN_CONVERTERS_SETTINGS:
+                FlScanShowOption(FlScanSetupJPEG,"Image Converters Setting","Configure Image converters");
+                break;
+            case FL_SCAN_HISTOGRAM:
+                FlScanShowOption(FlScanHistogram,"Histogram","Show image histogram");
+                break;
+            case FL_SCAN_OUTPUT_FILE_RESOLUTION:
+                FlScanShowOption(FlScanOutputResolutions,"Output file resolution will...","Select the output files resolutions\\nand zoom filter type");
+                break;
+            default:
+                FlScanShowOption(FlScanSaneLogo,NULL,"Powered by...");
+                break;
+        }
+    }} {}
+} 
+
+Function {FlScanShowOption(Fl_Group *w,const char *l,const char *t)} {open return_type void
+} {
+  code {/**/
+    if (lastOption) {
+        lastOption->hide();
+    }
+    if (l) {
+        FlScanSetOption->label(l);
+        FlScanSetOption->redraw();
+    }
+    if (w) {
+        w->tooltip(t);
+        w->show();
+        w->redraw();
+        lastOption=w;
+    }} {}
+} 
+
+Function {FlScanMenuize(const char *str)} {open return_type {char *}
+} {
+  code {static char title[256];
+int i=0,j=0;
+
+    for (i=0,j=0; str && str[i]; i++, j++) {
+        if (str[i]=='/' || str[i]=='|' || str[i]=='\\\\') {
+            title[j]='\\\\'; j++;
+        }
+        title[j]=str[i];
+    }
+    title[j]='\\0';
+    return title;} {}
+} 
+
+Function {FlScanChoiceCB(Fl_Widget *w,void *d)} {open return_type void
+} {
+  code {/**/
+    if (currentOption) {
+        FlScanSaneSetCB(false);
+    } else { /* Device Selection */
+        if (sane->device()!=(SANE_Device*)d) {
+            FlScanSaveCurrentDevice();
+            sane->open(((SANE_Device*)d)->name);
+            FlScanLoadCurrentDevice();
+            update_tree();
+            FlScanSelOption();
+        }
+    }
+    return;} {}
+} 
+
+Function {FlScanTableSetGamma()} {open return_type void
+} {
+  code {double val;
+const char *cval;
+
+    cval=FlScanTxGammaTable->value();
+    if (cval && sscanf(cval,"%lf",&val)!=EOF) {
+        FlScanTableGammaCurve->gamma(val);
+    }
+    FlScanTxGammaTable->value("");} {}
+} 
+
+Function {FlScanScannerCB(int fd,void *d)} {open return_type void
+} {
+  code {/**/
+    if (d) {
+        sane->scanner (
+            scan_buf,
+            4096*3,
+            (C_Sane_ScanCB)d
+        );
+    }} {}
+} 
+
+Function {FlScanPreviewCB(void *d,int l,int m)} {open return_type bool
+} {
+  code {SANE_Parameters *p;
+static int started=0;
+static int frame=-1;
+static int scan_fd=0;
+int zoomFilter;
+
+    p=(SANE_Parameters*)d;
+    switch (m) {
+        case C_Sane::USER_MODE:
+            if (!scan_buf) {
+                scan_buf = new char[4096*3];
+            }
+            if (scan_buf) {
+                if (preview_ndx>=0) {
+                    void *optval=0;
+                    SANE_Bool set=true;
+                    C_Sane_Option *opt = sane->option(preview_ndx);
+                    if (opt) {
+                        optval=(void*)&set;
+                        opt->value(optval);
+                    }
+                }
+                FlScanPbPreview->deactivate();
+                FlScanPbScan->deactivate();
+                FlScanPbReset->deactivate();
+                FlScanPbCancel->activate();
+                FlScanUpdateProgress("Device Initialization",false);
+                sane->scan (
+                    scan_buf,
+                    4096*3,
+                    (C_Sane_ScanCB)FlScanPreviewCB
+                );
+            }
+            // started=0;
+            break;
+        case C_Sane::START_FRAME:
+            frame=(p->format==SANE_FRAME_GRAY)?Image_Stream::FRAME_GRAY:
+                  (p->format==SANE_FRAME_RGB)?Image_Stream::FRAME_RGB:
+                  (p->format==SANE_FRAME_RED)?Image_Stream::FRAME_RED:
+                  (p->format==SANE_FRAME_GREEN)?Image_Stream::FRAME_GREEN:
+                  (p->format==SANE_FRAME_BLUE)?Image_Stream::FRAME_BLUE:-1;
+            FlScanUpdateProgress (
+                 (p->format==SANE_FRAME_GRAY)?"Receiving GRAY data":
+                 (p->format==SANE_FRAME_RGB)?"Receiving RGB data":
+                 (p->format==SANE_FRAME_RED)?"Receiving RED data":
+                 (p->format==SANE_FRAME_GREEN)?"Receiving GREEN data":
+                 (p->format==SANE_FRAME_BLUE)?"Receiving BLUE data":"Receiving data",
+                 false
+            );
+            if (!started) {
+                FlScanPreviewArea->begin (
+                    p->pixels_per_line,
+                    p->depth,
+                    (frame!=SANE_FRAME_GRAY)
+                );
+            } else {
+                FlScanPreviewArea->rewind();
+            }
+            started=1;
+            scan_fd=l;
+            if (scan_fd) {
+                Fl::add_fd(scan_fd,FL_READ|FL_EXCEPT,FlScanScannerCB,(void*)FlScanPreviewCB);
+            } else {
+                FlScanScannerCB(0,(void*)FlScanPreviewCB);
+            }
+            break;
+        case C_Sane::END_OF_DATA:
+            started=0;
+            if (scan_fd) {
+                Fl::remove_fd(scan_fd);
+            }
+            FlScanUpdateProgress("Updating Preview Window",false);
+            zoomFilter = FlScanPreviewArea->filter();
+            FlScanPreviewArea->filter(Image_Stream::UNDEFINED_FILTER);
+            FlScanPreviewArea->end();
+            FlScanPreviewArea->filter(zoomFilter);
+            FlScanPbCancel->deactivate();
+            FlScanPbPreview->activate();
+            FlScanPbReset->activate();
+            if (strlen(FlScanTxFileName->value())) {
+                FlScanPbScan->activate();
+            }
+            FlScanUpdateProgress("",false);
+            break;
+        case C_Sane::NEW_DATA:
+            if (frame>=0) {
+                FlScanUpdateProgress(0,true);
+                FlScanPreviewArea->add_row_data((unsigned char*)d,l,frame);
+            }
+            break;
+        case C_Sane::DATA_ERROR:
+            started=0;
+            if (scan_fd) {
+                Fl::remove_fd(scan_fd);
+            }
+            FlScanPbCancel->deactivate();
+            FlScanPbPreview->activate();
+            FlScanPbReset->activate();
+            if (strlen(FlScanTxFileName->value())) {
+                FlScanPbScan->activate();
+            }
+            FlScanUpdateProgress("ERROR",false);
+            FlScanPreviewArea->reset();
+            break;
+    }
+    return true;} {}
+} 
+
+Function {FlScanUpdateSelection()} {open return_type void
+} {
+  code {double sx,sy,sw,sh;
+
+    FlScanPreviewArea->selection(sx,sy,sw,sh);
+/*
+    printf (
+        "\\nsx=%f\\nsy=%f\\nsw=%f\\nsh=%f",
+        sx*100.0,
+        sy*100.0,
+        sw*100.0,
+        sh*100.0
+    );
+*/
+    fflush(stdout);} {}
+} 
+
+Function {FlScanUpdateProgress(const char *msg,bool working)} {open return_type void
+} {
+  code {static char *message=0;
+static int sense=1;
+double val;
+
+    if (msg) {
+        message=(char *)msg;
+    }
+    FlScanProgressBar->label((message)?message:"");
+    if (working) {
+        val=FlScanProgressBar->value() + sense;
+        if (sense>0 && val>=FlScanProgressBar->maximum()) {
+           sense=-1;
+           val=FlScanProgressBar->maximum();
+        } else if (sense<0 && val<=FlScanProgressBar->minimum()) {
+           sense=+1;
+           val=FlScanProgressBar->minimum();
+        }
+        FlScanProgressBar->value(val);
+    } else {
+        FlScanProgressBar->value(FlScanProgressBar->minimum());
+        sense=+1;
+    }
+    FlScanProgressBar->damage(FL_DAMAGE_ALL);
+    FlScanProgressBar->redraw();
+    Fl::flush();} {}
+} 
+
+Function {FlScanScanCB(void *d,int l,int m)} {open return_type bool
+} {
+  code {SANE_Parameters *p;
+static int started=0;
+static int frame=-1;
+static int scan_fd=0;
+double cx,cy,cw,ch;
+char *fname=NULL;
+int zoomFilter;
+
+    p=(SANE_Parameters*)d;
+    switch (m) {
+        case C_Sane::USER_MODE:
+            if (!scan_buf) {
+                scan_buf = new char[4096*3];
+            }
+            if (scan_buf) {
+                if (preview_ndx>=0) {
+                    void *optval=0;
+                    SANE_Bool set=false;
+                    C_Sane_Option *opt = sane->option(preview_ndx);
+                    if (opt) {
+                        optval=(void*)&set;
+                        opt->value(optval);
+                    }
+                }
+                FlScanPbPreview->deactivate();
+                FlScanPbScan->deactivate();
+                FlScanPbReset->deactivate();
+                FlScanPbCancel->activate();
+                FlScanUpdateProgress("Device Initialization",false);
+                sane->scan (
+                    scan_buf,
+                    4096*3,
+                    (C_Sane_ScanCB)FlScanScanCB
+                );
+            }
+            // started=0;
+            break;
+        case C_Sane::START_FRAME:
+            frame=(p->format==SANE_FRAME_GRAY)?Image_Stream::FRAME_GRAY:
+                  (p->format==SANE_FRAME_RGB)?Image_Stream::FRAME_RGB:
+                  (p->format==SANE_FRAME_RED)?Image_Stream::FRAME_RED:
+                  (p->format==SANE_FRAME_GREEN)?Image_Stream::FRAME_GREEN:
+                  (p->format==SANE_FRAME_BLUE)?Image_Stream::FRAME_BLUE:-1;
+            FlScanUpdateProgress (
+                 (p->format==SANE_FRAME_GRAY)?"Receiving GRAY data":
+                 (p->format==SANE_FRAME_RGB)?"Receiving RGB data":
+                 (p->format==SANE_FRAME_RED)?"Receiving RED data":
+                 (p->format==SANE_FRAME_GREEN)?"Receiving GREEN data":
+                 (p->format==SANE_FRAME_BLUE)?"Receiving BLUE data":"Receiving data",
+                 false
+            );
+            if (!started) {
+                FlScanOutputFile.begin (
+                    p->pixels_per_line,
+                    p->depth,
+                    (frame!=SANE_FRAME_GRAY)
+                );
+                OutputImageFile *of=FlScanOutputFile.format(Output_File::JPEG);
+                if (of) {
+                    of->set_quality((int)FlScanFFmtSlQltJPEG->value());
+                    of->set_smoothing((int)FlScanFFmtSlSmtJPEG->value());
+                    of->set_optimization((int)FlScanFFmtTbOptJPEG->value());
+                }
+                of=FlScanOutputFile.format(Output_File::PNG);
+                if (of) {
+                    of->set_quality((int)FlScanFFmtSlCompressionPNG->value());
+                }
+            } else {
+                FlScanOutputFile.rewind();
+            }
+            started=1;
+            scan_fd=l;
+            if (scan_fd) {
+                Fl::add_fd(scan_fd,FL_READ|FL_EXCEPT,FlScanScannerCB,(void*)FlScanScanCB);
+            } else {
+                FlScanScannerCB(0,(void*)FlScanScanCB);
+            }
+            break;
+        case C_Sane::END_OF_DATA:
+            started=0;
+            if (scan_fd) {
+                Fl::remove_fd(scan_fd);
+            }
+            fname=new char[strlen(FlScanTxFileName->value())+4+9+1];
+            if (fname) {
+                bool one_saved=false;
+                char msg[40];
+                int ext_len=0;
+                if (FlScanOutputFile.extension()) {
+                    ext_len=strlen(FlScanOutputFile.extension());
+                }
+                strcpy(fname,FlScanTxFileName->value());
+                char *strbuf = new char [strlen(fname)+4+9+1+ext_len];
+                if (strbuf) {
+                    if (
+                        FlScanOutputFile.extension() &&
+                        !strcasecmp (
+                            &fname[strlen(fname)-ext_len],
+                            FlScanOutputFile.extension()
+                        )
+                    ) {
+                        fname[strlen(fname)-ext_len]='\\0';
+                    }
+                    zoomFilter = FlScanOutputFile.Image_Stream::filter();
+                    FlScanOutputFile.Image_Stream::filter(FlScanZoomFilter);
+                    // FlScanOutputFile.matrix(FlScanPreviewArea->matrix());
+                    FlScanPreviewArea->selection(cx,cy,cw,ch);
+                    // FlScanOutputFile.clip(cx,cy,cw,ch);
+                    FlScanUpdateCounterInFilename(&fname,1,1,4);
+                    FlScanTxFileName->value(fname);
+                    for (int i=1;i<=FlScanLsOutputGeometries->size();i++) {
+                        if (FlScanLsOutputGeometries->selected(i)) {
+                            int geom = (int)FlScanLsOutputGeometries->data(i);
+                            if (geom) {
+                                sprintf(msg,"Saving File - %d x %d",geom,geom);
+                                sprintf(strbuf,"%s_%d",fname,geom);
+                            } else {
+                                sprintf(msg,"Saving File - Full Size");
+                                sprintf(strbuf,"%s_FullSize",fname);
+                            }
+                            if (FlScanOutputFile.extension()) {
+                                strcat(strbuf,FlScanOutputFile.extension());
+                            }
+                            FlScanUpdateProgress(msg,false);
+                            FlScanOutputFile.matrix(FlScanPreviewArea->matrix());
+                            FlScanOutputFile.clip(cx,cy,cw,ch);
+                            FlScanOutputFile.write(strbuf,geom,FlScanSaveProgressCB);
+                            FlScanOutputFile.clip(0.0,0.0,1.0,1.0);
+                            one_saved=true;
+                        }
+                    }
+                    if (!one_saved) {
+                        sprintf(msg,"Saving File - Full Size");
+                        FlScanUpdateProgress(msg,false);
+                        sprintf(strbuf,"%s_FullSize",fname);
+                        if (FlScanOutputFile.extension()) {
+                            strcat(strbuf,FlScanOutputFile.extension());
+                        }
+                        FlScanOutputFile.matrix(FlScanPreviewArea->matrix());
+                        FlScanOutputFile.clip(cx,cy,cw,ch);
+                        FlScanOutputFile.write(strbuf,0,FlScanSaveProgressCB);
+                        FlScanOutputFile.clip(0.0,0.0,1.0,1.0);
+                    }
+                    FlScanOutputFile.Image_Stream::filter(zoomFilter);
+                    delete strbuf;
+                }
+                FlScanOutputFile.reset();
+                delete fname;
+            }
+            // FlScanOutputFile.clip(0.0,0.0,1.0,1.0);
+            FlScanPbCancel->deactivate();
+            FlScanPbPreview->activate();
+            FlScanPbScan->activate();
+            FlScanPbReset->activate();
+            FlScanUpdateProgress("",false);
+            break;
+        case C_Sane::NEW_DATA:
+            if (frame>=0) {
+                FlScanUpdateProgress(0,true);
+                FlScanOutputFile.add_row_data((unsigned char*)d,l,frame);
+            }
+            break;
+        case C_Sane::DATA_ERROR:
+            started=0;
+            if (scan_fd) {
+                Fl::remove_fd(scan_fd);
+            }
+            FlScanPbCancel->deactivate();
+            FlScanPbPreview->activate();
+            FlScanPbScan->activate();
+            FlScanPbReset->activate();
+            FlScanUpdateProgress("ERROR",false);
+            FlScanOutputFile.reset();
+            break;
+    }
+    return true;} {}
+} 
+
+Function {dump_sane()} {open return_type void
+} {
+  code {int hlp, x;
+SANE_Parameters *pars;
+const SANE_Option_Descriptor *sod;
+
+    for (hlp=0;sane->num_devices() && sane->device(hlp);++hlp) {
+        fprintf(stderr,"Device[%d].name   : %s\\n",hlp,sane->device(hlp)->name);
+        fprintf(stderr,"Device[%d].vendor : %s\\n",hlp,sane->device(hlp)->vendor);
+        fprintf(stderr,"Device[%d].model  : %s\\n",hlp,sane->device(hlp)->model);
+        fprintf(stderr,"Device[%d].type   : %s\\n",hlp,sane->device(hlp)->type);
+    }
+    for (hlp = 0; hlp < sane->num_options() && sane->option(hlp); hlp++) {
+        sod = sane->option(hlp)->descriptor();
+        if (sod == NULL) {
+            break;
+        }
+        fprintf (stderr, "Gopt(%d) : stat=%p {\\n", hlp, sod);
+        fprintf (stderr, "\\tname : %s\\n", sod->name);
+        fprintf (stderr, "\\ttitle: %s\\n", sod->title);
+        fprintf (stderr, "\\tdesc : %s\\n", sod->desc);
+
+        fprintf (
+            stderr,
+            "\\ttype : %d [%s]\\n",
+            sod->type,
+            (sod->type==SANE_TYPE_BOOL)?"bool":
+            (sod->type==SANE_TYPE_INT)?"int":
+            (sod->type==SANE_TYPE_FIXED)?"fixed":
+            (sod->type==SANE_TYPE_STRING)?"string":
+            (sod->type==SANE_TYPE_BUTTON)?"button":
+            (sod->type==SANE_TYPE_GROUP)?"group":"UNKNOWN"
+        );
+        fprintf (
+            stderr,
+            "\\tunit : %d [%s]\\n",
+            sod->unit,
+            (sod->unit==SANE_UNIT_NONE)?"unit-less (e.g., \# of scans)":
+            (sod->unit==SANE_UNIT_PIXEL)?"number of pixels":
+            (sod->unit==SANE_UNIT_BIT)?"number of bits":
+            (sod->unit==SANE_UNIT_MM)?"millimeters":
+            (sod->unit==SANE_UNIT_DPI)?"resolution in dots/inch":
+            (sod->unit==SANE_UNIT_PERCENT)?"percentage":
+            (sod->unit==SANE_UNIT_MICROSECOND)?"micro seconds":"UNKNOWN"
+        );
+        fprintf (stderr, "\\tsize : %d\\n", sod->size);
+        fprintf (stderr, "\\tcap  : %d [", sod->cap);
+        if (sod->cap&SANE_CAP_SOFT_SELECT) {
+            fprintf (stderr, " SOFT_SELECT");
+        }
+        if (sod->cap&SANE_CAP_HARD_SELECT) {
+            fprintf (stderr, " HARD_SELECT");
+        }
+        if (sod->cap&SANE_CAP_SOFT_DETECT) {
+            fprintf (stderr, " SOFT_DETECT");
+        }
+        if (sod->cap&SANE_CAP_EMULATED) {
+            fprintf (stderr, " EMULATED");
+        }
+        if (sod->cap&SANE_CAP_AUTOMATIC) {
+            fprintf (stderr, " AUTOMATIC");
+        }
+        if (sod->cap&SANE_CAP_INACTIVE) {
+            fprintf (stderr, " INACTIVE");
+        }
+        if (sod->cap&SANE_CAP_ADVANCED) {
+            fprintf (stderr, " ADVANCED");
+        }
+        if (sod->cap&SANE_CAP_ALWAYS_SETTABLE) {
+            fprintf (stderr, " ALWAYS_SETTABLE");
+        }
+        fprintf (stderr, " ]\\n");
+        fprintf (
+            stderr,
+            "\\tctyp : %d [%s]\\n",
+            sod->constraint_type,
+            (sod->constraint_type==SANE_CONSTRAINT_NONE)?"no constraints":
+            (sod->constraint_type==SANE_CONSTRAINT_RANGE)?"range":
+            (sod->constraint_type==SANE_CONSTRAINT_WORD_LIST)?"word list":
+            (sod->constraint_type==SANE_CONSTRAINT_STRING_LIST)?"string list":
+            "UNKNOWN"
+        );
+        switch (sod->constraint_type) {
+            case SANE_CONSTRAINT_NONE:
+                break;
+            case SANE_CONSTRAINT_STRING_LIST:
+                fprintf(stderr,"\\t\\tstringlist:");
+                for (x=0;sod->constraint.string_list[x];x++) {
+                    fprintf(stderr," %s,",sod->constraint.string_list[x]);
+                }
+                fprintf(stderr,"\\n");
+                break;
+            case SANE_CONSTRAINT_WORD_LIST:
+                fprintf (
+                    stderr,
+                    "\\t\\twordlist (%d) : ",
+                    sod->constraint.word_list[0]
+                );
+                if (sod->type==SANE_TYPE_FIXED) {
+                    for (x = 1; x <= sod->constraint.word_list[0]; x++) {
+                        fprintf (
+                            stderr,
+                            " %g ",
+                            SANE_UNFIX(sod->constraint.word_list[x])
+                        );
+                    }
+                } else {
+                    for (x = 1; x <= sod->constraint.word_list[0]; x++) {
+                        fprintf (
+                            stderr,
+                            " %d ",
+                            sod->constraint.word_list[x]
+                        );
+                    }
+                }
+                fprintf(stderr,"\\n");
+                break;
+            case SANE_CONSTRAINT_RANGE:
+                if (sod->type==SANE_TYPE_FIXED) {
+                    fprintf (
+                        stderr,
+                        "\\t\\trange: min=%g max=%g quantization=%g \\n",
+                        SANE_UNFIX(sod->constraint.range->min),
+                        SANE_UNFIX(sod->constraint.range->max),
+                        SANE_UNFIX(sod->constraint.range->quant)
+                    );
+                } else {
+                    fprintf (
+                        stderr,
+                        "\\t\\trange: min=%d max=%d quantization=%d \\n",
+                        sod->constraint.range->min,
+                        sod->constraint.range->max,
+                        sod->constraint.range->quant
+                    );
+                }
+                break;
+        }
+        if (
+            SANE_OPTION_IS_ACTIVE(sod->cap) &&
+            (sod->type==SANE_TYPE_STRING ||
+            sod->size==sizeof(SANE_Word))
+        ) {
+            C_Sane_Value val;
+            fprintf(stderr,"\\tvalue: ");
+            val = sane->option(hlp)->value();
+            switch (sod->type) {
+                case SANE_TYPE_BOOL:
+                    fprintf(stderr,"%s",((bool)val)?"true":"false");
+                    break;
+                case SANE_TYPE_INT:
+                    fprintf(stderr,"%d",(int)val);
+                    break;
+                case SANE_TYPE_FIXED:
+                    fprintf(stderr,"%g",(double)val);
+                    break;
+                case SANE_TYPE_STRING:
+                    fprintf(stderr,"%s",(char*)val);
+                    break;
+                default:
+                    break;
+            }
+            fprintf(stderr,"\\n");
+        }
+        fprintf(stderr,"}\\n");
+    }
+    pars = sane->parameters();
+    fprintf(stderr,"Parm : stat=%s {\\n",(SANE_String_Const)sane->status());
+    if (pars) {
+        fprintf (
+            stderr,
+            "\\tform=%d [%s]\\n",
+            pars->format,
+            (pars->format==SANE_FRAME_GRAY)?
+                "FRAME GRAY (band covering human visual range)":
+            (pars->format==SANE_FRAME_RGB)?
+                "FRAME RGB (pixel-interleaved red/green/blue bands)":
+            (pars->format==SANE_FRAME_RED)?
+                "FRAME RED (red band only)":
+            (pars->format==SANE_FRAME_GREEN)?
+                "FRAME GREEN (green band only)":
+            (pars->format==SANE_FRAME_BLUE)?
+                "FRAME BLUE (blue band only)":"UNKNOWN"
+        );
+        fprintf(stderr,"\\tlast frame=%s\\n",(pars->last_frame)?"true":"false");
+        fprintf(stderr,"\\tbytes per line=%d\\n",pars->bytes_per_line);
+        fprintf(stderr,"\\tpixels per line=%d\\n",pars->pixels_per_line);
+        fprintf(stderr,"\\tlines=%d\\n",pars->lines);
+        fprintf(stderr,"\\tdepth=%d\\n}\\n",pars->depth);
+    }
+    fflush(stderr);} {}
+} 
+
+Function {FlScanSaveProgressCB(int prog)} {open return_type void
+} {
+  code {static int lastProg=0;
+
+    if (!FlScanEeWaitForSaving->visible()) {
+        Fl::wait(0);
+    }
+    if (prog!=lastProg) {
+        if (prog>=0) {
+            FlScanUpdateProgress(0,true);
+        } else {
+            FlScanUpdateProgress("Flushing data to file",false);
+        }
+        lastProg=prog;
+    }} {}
+} 
+
+Function {FlScanGetCurrentDeviceConfigFileName(void)} {open return_type {char*}
+} {
+  code {static const char hexdigit[] = "0123456789abcdef";
+static char cfgfile[1024];
+char *devicename,ch;
+int i,j;
+
+    cfgfile[0]='\\0';
+    if (sane->device()) {
+        if ((devicename=(char*)sane->device()->name)) {
+            fl_filename_expand(cfgfile,"~/.sane");
+            mkdir(cfgfile,0777);
+            fl_filename_expand(cfgfile,"~/.sane/flscan-sane.cfg");
+            mkdir(cfgfile,0777);
+            strcat(cfgfile,"/");
+            i=strlen(cfgfile);
+            for (j=0;(ch=devicename[j])!='\\0';j++) {
+                if (isalnum(ch)) {
+                    cfgfile[i++]=ch;
+                } else {
+                    cfgfile[i++]='-';
+                    if (ch!='-') {
+                        cfgfile[i++]=hexdigit[(ch>>4)&0x0f];
+                        cfgfile[i++]=hexdigit[(ch>>0)&0x0f];
+                    }
+                    cfgfile[i++]='-';
+                }
+            }
+            cfgfile[i]='\\0';
+            if ((devicename=strdup(cfgfile))) {
+                fl_filename_expand(cfgfile,devicename);
+                free(devicename);
+            } else {
+                cfgfile[0]='\\0';
+            }
+        }
+    }
+    return cfgfile;} {}
+} 
+
+Function {FlScanValidateOptionSaving(char *optname)} {open return_type bool
+} {
+  code {return (
+    optname &&
+    strcmp(optname,SANE_NAME_PREVIEW) &&
+    strcmp(optname,SANE_NAME_SCAN_TL_X)
+  /* &&
+    strcmp(optname,SANE_NAME_SCAN_TL_Y) &&
+    strcmp(optname,SANE_NAME_SCAN_BR_X) &&
+    strcmp(optname,SANE_NAME_SCAN_BR_Y)
+  */
+);} {}
+} 
+
+Function {FlScanSaveCurrentDevice(void)} {open return_type void
+} {
+  code {char *cfgfile;
+FILE *pfcfg;
+
+      cfgfile = FlScanGetCurrentDeviceConfigFileName();
+      if (cfgfile && cfgfile[0]!='\\0' && (pfcfg=fopen(cfgfile,"wb"))) {
+          sane->save(pfcfg,FlScanValidateOptionSaving);
+          fclose(pfcfg);
+      }} {}
+} 
+
+Function {FlScanLoadCurrentDevice(void)} {open return_type void
+} {
+  code {char *cfgfile;
+FILE *pfcfg;
+
+      cfgfile = FlScanGetCurrentDeviceConfigFileName();
+      if (cfgfile && cfgfile[0]!='\\0' && (pfcfg=fopen(cfgfile,"rb"))) {
+          sane->load(pfcfg,FlScanValidateOptionSaving);
+          fclose(pfcfg);
+      }} {}
+} 
+
+Function {FlScanUpdateCounterInFilename(char **filename,int skip,int step,int min_counter_len)} {open return_type void
+} {
+  code {FILE *testfile;
+char *position_point = NULL;
+char *position_counter;
+char  buf[FILENAME_MAX];
+int   counter, i, j;
+int   counter_len;
+int   set_counter_len = min_counter_len;
+bool  last_was_space=false;
+
+    for (i=0, j=0; (*filename)[i]; i++) {
+        if (isspace((*filename)[i])) {
+            last_was_space=true;
+        } else {
+            (*filename)[j++] = (last_was_space) ? toupper((*filename)[i])
+                                                : (*filename)[i];
+            last_was_space=false;
+        }
+    }
+    (*filename)[j++] = '\\0';
+    position_point = strrchr(*filename, '.');
+    if (!position_point) { /* nothing usable ? */
+        /* here is no point, but position - 1 is last character */
+        position_point = *filename + strlen(*filename);
+    }
+    if (position_point) {
+        /* go to last number of counter (if counter exists) */
+        position_counter = position_point - 1;
+        /* search non numeric char */
+        while (
+            ( position_counter >= *filename) &&
+            (*position_counter >= '0'      ) &&
+            (*position_counter <= '9'      )
+        ) {
+            position_counter--; /* search fisrt numeric character */
+        }
+        position_counter++;     /* go to first numeric charcter */
+        counter_len = position_point - position_counter;
+        if (counter_len) {      /* we have a counter */
+            sscanf(position_counter,"%d",&counter);
+
+            while (1) { /* may be we have to skip existing files */
+                counter += step;    /* update counter */
+                if (counter < 0) {
+                    counter = 0;
+//                  xsane_back_gtk_warning (WARN_COUNTER_UNDERRUN, TRUE);
+                    break;      /* last available number ("..999") */
+                }
+                /* set end of string mark to counter start */
+                *position_counter = 0;
+                if (set_counter_len == 0) {
+                    set_counter_len = counter_len;
+                }
+                snprintf (
+                    buf,
+                    sizeof(buf),
+                    "%s%0*d%s",
+                    *filename,
+                    set_counter_len,
+                    counter,
+                    position_point
+                );
+                if (skip) { /* test if filename already used */
+                    /* read binary (b for win32) */
+                    testfile = fopen(buf,"rb");
+                    if (testfile) { /* filename used: skip */
+                        fclose(testfile);
+                    } else {
+                        free(*filename);
+                        *filename = strdup(buf);
+                        break;  /* filename not used, ok */
+                    }
+                } else {        /* do not test if filename already used */
+                    free(*filename);
+                    *filename = strdup(buf);
+                    break;      /* filename ok */
+                }
+            }
+        }
+    }} {}
+} 
+
+Function {FlScanFillInGeometries(Fl_Browser *o)} {open return_type void
+} {
+  code {if (o) {
+    o->add("... be Full Size",(void*)0);
+    o->add("... fit in  400x 400",(void*)400);
+    o->add("... fit in  512x 512",(void*)512);
+    o->add("... fit in  700x 700",(void*)700);
+    o->add("... fit in  912x 912",(void*)912);
+    o->add("... fit in 1024x1024",(void*)1024);
+}} {}
+} 
+
+Function {FlScanSaveSettings(void)} {open return_type void
+} {
+  code {\#if 0 /* TODO */
+char cfgfile[1024];
+FILE *pfcfg;
+
+      cfgfile = FlScanGetCurrentConfigFileName();
+      fl_filename_expand(cfgfile,"~/.sane");
+      mkdir(cfgfile,0777);
+      fl_filename_expand(cfgfile,"~/.sane/flscan-sane.cfg");
+      mkdir(cfgfile,0777);
+      strcat(cfgfile,"/global_settings");
+      if (cfgfile && cfgfile[0]!='\\0' && (pfcfg=fopen(cfgfile,"wb"))) {
+          // save settings
+          fclose(pfcfg);
+      }
+\#endif} {}
+} 
+
+Function {FlScanLoadSettings(void)} {open return_type void
+} {
+  code {\#if 0 /* TODO */
+char cfgfile[1024];
+FILE *pfcfg;
+
+      cfgfile = FlScanGetCurrentConfigFileName();
+      fl_filename_expand(cfgfile,"~/.sane/flscan-sane.cfg/global_settings");
+      if (cfgfile && cfgfile[0]!='\\0' && (pfcfg=fopen(cfgfile,"rb"))) {
+          // load settings
+          fclose(pfcfg);
+      }
+\#endif} {}
+} 
+
+Function {FlScanUpdateDirectory(void)} {open return_type void
+} {
+  code {char *pathname = new char[strlen(FlScanFileBrowser->directory())+3];
+    if (pathname) {
+        sprintf(pathname,"%s/.",FlScanFileBrowser->directory());
+        FlScanFileBrowser->load(pathname);
+    }} {}
+} 
+
+Function {FlScanChangeDirectory()} {open return_type void
+} {
+  code {const char *item = FlScanFileBrowser->text(FlScanFileBrowser->value());
+if (item) {
+    char *pathname = new char[strlen(FlScanFileBrowser->directory())+1+strlen(item)+1];
+    if (pathname) {
+        sprintf(pathname,"%s/%s",FlScanFileBrowser->directory(),item);
+        if (fl_filename_isdir(pathname))  {
+            FlScanFileBrowser->load(pathname);
+        } else {
+            FlScanShowImage(pathname);
+        }
+    }
+}} {}
+} 
+
+Function {FlScanShowImage(char *pname)} {open return_type void
+} {
+  code {char *pathname;
+
+    pathname=pname;
+    if (strrchr(pname,'/') == NULL ){
+        char* cur_dir = new char[1024];
+        if ((getcwd(cur_dir,sizeof(cur_dir)))==NULL) return;
+        char *path_name = new char[strlen(cur_dir)+1+strlen(pname)+3];
+        sprintf(path_name,"%s/%s",cur_dir,pname);
+        pathname=path_name;
+    }  
+    char *ext = strrchr(pathname, '.');
+    if (ext) {
+        if (strcmp(ext,".jpg") == 0 || strcmp (ext,".JPG") == 0 ||
+        strcmp (ext,".jpeg") == 0 || strcmp (ext,".JPEG") == 0 ) {
+            readJPEG(pathname,FlScanReadImageCB);
+        } else if (strcmp(ext,".png")==0 || strcmp(ext,".PNG")==0) {
+            readPNG(pathname,FlScanReadImageCB);
+        }
+    }} {}
+} 
+
+Function {FlScanReadImageCB(unsigned char *row,int w,int d,int c,int m)} {open return_type bool
+} {
+  code {static int started=0;
+static int frame=-1;
+
+    switch (m) {
+        case 0:
+            frame=(c==0)?Image_Stream::FRAME_GRAY:Image_Stream::FRAME_RGB;
+            FlScanUpdateProgress (
+                 (frame==Image_Stream::FRAME_GRAY)?"Receiving GRAY data":
+                 (frame==Image_Stream::FRAME_RGB)?"Receiving RGB data":
+                 (frame==Image_Stream::FRAME_RED)?"Receiving RED data":
+                 (frame==Image_Stream::FRAME_GREEN)?"Receiving GREEN data":
+                 (frame==Image_Stream::FRAME_BLUE)?"Receiving BLUE data":"Receiving data",
+                 false
+            );
+            if (!started) {
+                FlScanViewArea->begin(w,d,(frame!=SANE_FRAME_GRAY));
+            } else {
+                FlScanViewArea->rewind();
+            }
+            started=1;
+            break;
+        case 2:
+            started=0;
+            FlScanUpdateProgress("Updating Preview Window",false);
+            FlScanViewArea->end();
+            FlScanSwViewArea->position(0,0);
+            FlScanSwViewArea->redraw();
+            FlScanUpdateProgress("",false);
+            break;
+        case 1:
+            if (frame>=0) {
+                FlScanUpdateProgress(0,true);
+                FlScanViewArea->add_row_data(row,d,frame);
+            }
+            break;
+        case -1:
+            started=0;
+            FlScanUpdateProgress("ERROR",false);
+            FlScanViewArea->reset();
+            break;
+    }
+    return true;} {}
+} 
+
+Function {FlScanCheckForImagesNotSaved()} {open return_type bool
+} {
+  code {bool allSaved=true;
+const char *pStrProgress;
+int exit=0;
+
+    for (
+        int i=0;
+        (pStrProgress=FlScanConversionArea->get_value(i,2));
+        i++
+    ) {
+        if (strcmp(pStrProgress,"Completed")) {
+            allSaved=false;
+            break;
+        }
+    }
+    if (!allSaved) {
+        // Show conversion area
+        FlScanTabs->push(0);
+        FlScanTabs->value(FlScanTabConversion);
+        FlScanTabs->do_callback();
+        fl_message_font(FL_HELVETICA_BOLD,12);
+        exit=fl_choice (
+            "There are still some images in saving progress",
+            "Don't Exit",
+            "Wait",
+            "Exit Now"
+        );
+        if (exit==2) {
+            allSaved=true;
+        } else if (exit==1) {
+            FlScanEeWaitForSaving->set_visible();
+            new ImageSavingMonitor();
+        }
+    }
+    return allSaved;} {}
+} 
+
+Function {make_copyright_window(char *copyright)} {open
+} {
+  Fl_Window {} {
+    label {FlScan Copyright} open
+    xywh {289 363 350 350} type Double modal visible
+  } {
+    Fl_Return_Button {} {
+      label OK
+      callback {((Fl_Window*)(o->parent()))->hide();}
+      xywh {5 320 340 25} labelfont 1
+    }
+    Fl_Help_View {} {
+      xywh {5 5 340 310} box THIN_DOWN_BOX
+      code0 {o->value(copyright);}
+    }
+  }
+} 
+
+Function {FlScanDeviceSelection(void)} {open return_type void
+} {
+  Fl_Window wDevList {
+    label {Device Selection} open
+    xywh {355 193 350 155} type Double modal visible
+  } {
+    Fl_Return_Button {} {
+      label OK
+      callback {((Fl_Window*)(o->parent()))->hide();}
+      xywh {5 125 340 25} labelfont 1
+    }
+    Fl_Browser lsDevList {
+      label {Choose the device from the below list:}
+      xywh {5 20 340 100} type Hold labelfont 1 align 5 when 3
+    }
+  }
+  code {const SANE_Device *dev = 0;
+int numDev = sane->num_devices();
+char *devName = 0;
+
+    if (numDev>1) {
+        lsDevList->clear();
+        for (int i=0; i<numDev; i++) {
+            dev = sane->device(i);
+            if (dev && dev->name) {
+                lsDevList->add(dev->name,(void*)dev);
+            }
+        }
+        wDevList->position (
+            Fl::x() + (Fl::w()/2 - wDevList->w()/2),
+            Fl::y() + (Fl::h()/2 - wDevList->h()/2)
+        );
+        wDevList->show();
+        while (wDevList->visible()) {
+            Fl::wait();
+        }
+        dev = (SANE_Device*)lsDevList->data (
+            lsDevList->value()
+        );
+    } else if (numDev>0) {
+        dev = sane->device(0);
+    }
+    if (dev && dev->name) {
+        devName = (char*)strdup(dev->name);
+        sane->open(devName);
+        free((void*)devName);
+        FlScanLoadCurrentDevice();
+    }
+    delete wDevList;
+    wDevList = 0;} {}
+} 
