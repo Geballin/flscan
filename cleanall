@@ -1,0 +1,9 @@
+rm -f config.cache config.log config.status Makefile FL.directory
+rm -f test *~ */*~ 
+rm -rf CMakeCach* *depends
+rm -f `find $1  -type f | \
+awk '/(TAGS|tags|core|bin\/.*|.*depend.*|.*~|\.(o|a|so|dsp|dsw|idb|dep|log|tmp|jbf|tar|v0|mak|cmake|cache|status|obj|pdb|pch|sbr|plg|lib|dll|exe|exp))$/{print}' | grep -v "Modules\/Find"`
+
+rm -f `find . -type f -name 'CMakeCach*.txt'`
+rm -rf `find . -type d | awk '/(Debug|Release|MinSizeRel|RelWithDebInfo)$/{print}'`
+rm -rf CMakeTmp cmake.check_cache
