@@ -1,108 +1,146 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0104 
+version 1.0303 
 i18n_type 1 
 i18n_include <libintl.h> 
 i18n_function gettext 
 header_name {.h} 
 code_name {.cxx}
-decl {\#include <stdio.h>} {} 
-
-decl {\#include <stdlib.h>} {} 
-
-decl {\#include <ctype.h>} {} 
-
-decl {\#include <strings.h>} {} 
-
-decl {\#include <FL/filename.H>} {} 
-
-decl {\#include <FL/fl_ask.H>} {} 
-
-decl {\#include <FL/Fl_Box.H>} {public
+decl {\#include <stdio.h>} {private local
 } 
 
-decl {\#include <sys/stat.h>} {} 
-
-decl {\#include <sys/types.h>} {} 
-
-decl {\#include <fcntl.h>} {} 
-
-decl {\#include <unistd.h>} {} 
-
-decl {\#include <ctype.h>} {} 
-
-decl {\#include "C_Sane.H"} {public
+decl {\#include <stdlib.h>} {private local
 } 
 
-decl {\#include "Output_File.H"} {} 
-
-decl {\#include "flscan_thread.h"} {public
+decl {\#include <ctype.h>} {private local
 } 
 
-decl {\#include <Threads.H>} {public
+decl {\#include <strings.h>} {private local
 } 
 
-decl {Trigger running;} {public
+decl {\#include <FL/filename.H>} {private local
 } 
 
-decl {\#define TEXT_TO_SLIDER 1} {} 
-
-decl {\#define SLIDER_TO_TEXT !TEXT_TO_SLIDER} {} 
-
-decl {\#define DECREASE_SIZE -1} {} 
-
-decl {\#define INCREASE_SIZE -2} {} 
-
-decl {\#define FIT_TO_SCREEN -3} {} 
-
-decl {\#define FL_SCAN_OUTPUT_FILE_RESOLUTION -4} {} 
-
-decl {\#define FL_SCAN_CONVERTERS_SETTINGS -3} {} 
-
-decl {\#define FL_SCAN_HISTOGRAM -2} {} 
-
-decl {\#define FL_SCAN_DEVICE_SELECTION -1} {} 
-
-decl {\#define FL_SCAN_SCAN_MODE 0} {} 
-
-decl {\#define FL_SCAN_VIEW_MODE !FL_SCAN_SCAN_MODE} {} 
-
-decl {int preview_ndx=-1;} {} 
-
-decl {int tl_x_ndx=-1;} {} 
-
-decl {int tl_y_ndx=-1;} {} 
-
-decl {int br_x_ndx=-1;} {} 
-
-decl {int br_y_ndx=-1;} {} 
-
-decl {C_Sane *sane;} {public
+decl {\#include <FL/fl_ask.H>} {private local
 } 
 
-decl {C_Sane_Option *currentOption=0;} {} 
-
-decl {SANE_Int currentOption_num=0;} {} 
-
-decl {Fl_Group *lastOption=0;} {} 
-
-decl {Fl_Window *copyrightWindow=0;} {} 
-
-decl {char *sane_host;} {public
+decl {\#include <FL/Fl_Box.H>} {public local
 } 
 
-decl {char *scan_buf=0;} {} 
-
-decl {Output_File FlScanOutputFile;} {} 
-
-decl {extern char *copyrightText;} {public
+decl {\#include <sys/stat.h>} {private local
 } 
 
-decl {int FlScanZoomFilter=Image_Stream::UNDEFINED_FILTER;} {} 
+decl {\#include <sys/types.h>} {private local
+} 
+
+decl {\#include <fcntl.h>} {private local
+} 
+
+decl {\#include <unistd.h>} {private local
+} 
+
+decl {\#include <ctype.h>} {private local
+} 
+
+decl {\#include "C_Sane.H"} {public local
+} 
+
+decl {\#include "Output_File.H"} {private local
+} 
+
+decl {\#include "flscan_thread.h"} {public local
+} 
+
+decl {\#include <Threads.H>} {public local
+} 
+
+decl {Trigger running;} {public local
+} 
+
+decl {\#define TEXT_TO_SLIDER 1} {private local
+} 
+
+decl {\#define SLIDER_TO_TEXT !TEXT_TO_SLIDER} {private local
+} 
+
+decl {\#define DECREASE_SIZE -1} {private local
+} 
+
+decl {\#define INCREASE_SIZE -2} {private local
+} 
+
+decl {\#define FIT_TO_SCREEN -3} {private local
+} 
+
+decl {\#define FL_SCAN_OUTPUT_FILE_RESOLUTION -4} {private local
+} 
+
+decl {\#define FL_SCAN_CONVERTERS_SETTINGS -3} {private local
+} 
+
+decl {\#define FL_SCAN_HISTOGRAM -2} {private local
+} 
+
+decl {\#define FL_SCAN_DEVICE_SELECTION -1} {private local
+} 
+
+decl {\#define FL_SCAN_SCAN_MODE 0} {private local
+} 
+
+decl {\#define FL_SCAN_VIEW_MODE !FL_SCAN_SCAN_MODE} {private local
+} 
+
+decl {int preview_ndx=-1;} {private local
+} 
+
+decl {int tl_x_ndx=-1;} {private local
+} 
+
+decl {int tl_y_ndx=-1;} {private local
+} 
+
+decl {int br_x_ndx=-1;} {private local
+} 
+
+decl {int br_y_ndx=-1;} {private local
+} 
+
+decl {C_Sane *sane;} {public local
+} 
+
+decl {C_Sane_Option *currentOption=0;} {private local
+} 
+
+decl {SANE_Int currentOption_num=0;} {private local
+} 
+
+decl {Fl_Group *lastOption=0;} {private local
+} 
+
+decl {Fl_Window *copyrightWindow=0;} {private local
+} 
+
+decl {char *sane_host;} {public local
+} 
+
+decl {char *scan_buf=0;} {private local
+} 
+
+decl {Output_File FlScanOutputFile;} {private local
+} 
+
+decl {extern char *copyrightText;} {public local
+} 
+
+decl {int FlScanZoomFilter=Image_Stream::UNDEFINED_FILTER;} {private local
+} 
 
 class EatEvent {open : {public Fl_Box}
 } {
-  Function {EatEvent(int x,int y,int w,int h,const char *l=0): Fl_Box(x,y,w,h,l)} {open
-  } {}
+  Function {EatEvent(int x,int y,int w,int h,const char *l=NULL): Fl_Box(x,y,w,h,l)} {open
+  } {
+    code {} {selected
+    }
+  }
   Function {handle(int e)} {open return_type int
   } {
     code {//
@@ -165,8 +203,8 @@ Function {auth_callback(SANE_String_Const domain,SANE_Char username[SANE_MAX_USE
 Function {makeFlSCAN(bool enable_scan)} {open
 } {
   Fl_Window FlScan {
-    label {Fl Scan} open selected
-    xywh {3 490 640 480} type Double
+    label {Fl Scan} open
+    xywh {610 319 640 480} type Double
     code0 {o->size_range(640,480,640,480);}
     code1 {copyrightWindow=make_copyright_window(copyrightText);} modal visible
   } {
@@ -194,27 +232,27 @@ Function {makeFlSCAN(bool enable_scan)} {open
               code0 {\#include <FL/Fl_Sorted_Choice.H>}
               class Fl_Sorted_Choice
             } {
-              menuitem FlScanScanFileTypeJPEG {
+              MenuItem FlScanScanFileTypeJPEG {
                 label {.jpeg}
                 callback {FlScanOutputFile.type(Output_File::JPEG);}
                 xywh {75 355 100 20} labelfont 1 labelsize 12
               }
-              menuitem FlScanScanFileTypePNG {
+              MenuItem FlScanScanFileTypePNG {
                 label {.png}
                 callback {FlScanOutputFile.type(Output_File::PNG);}
                 xywh {55 355 100 20} labelfont 1 labelsize 12
               }
-              menuitem FlScanScanFileTypePNM {
+              MenuItem FlScanScanFileTypePNM {
                 label {.pnm}
                 callback {/* FlScanOutputFile.type(Output_File::PNM); */}
                 xywh {65 355 100 20} labelfont 1 labelsize 12 hide
               }
-              menuitem FlScanScanFileTypeRAW {
+              MenuItem FlScanScanFileTypeRAW {
                 label {.raw}
                 callback {/* FlScanOutputFile.type(Output_File::RAW);*/}
                 xywh {25 355 100 20} labelfont 1 labelsize 12 hide
               }
-              menuitem FlScanScanFileTypeTIFF {
+              MenuItem FlScanScanFileTypeTIFF {
                 label {.tiff}
                 callback {/* FlScanOutputFile.type(Output_File::TIFF);*/}
                 xywh {85 355 100 20} labelfont 1 labelsize 12 hide
@@ -441,77 +479,77 @@ FlScanPbSetOption->show();}
               code2 {FlScanZoomFilter=Image_Stream::BOX_FILTER;}
               class Fl_Sorted_Choice
             } {
-              menuitem {} {
+              MenuItem {} {
                 label Point
                 callback {FlScanZoomFilter=Image_Stream::POINT_FILTER;}
                 xywh {15 15 100 20} labelfont 1 labelsize 12
               }
-              menuitem {} {
+              MenuItem {} {
                 label Box
                 callback {FlScanZoomFilter=Image_Stream::BOX_FILTER;}
                 xywh {25 25 100 20} labelfont 1 labelsize 12
               }
-              menuitem {} {
+              MenuItem {} {
                 label Triangle
                 callback {FlScanZoomFilter=Image_Stream::TRIANGLE_FILTER;}
                 xywh {35 35 100 20} labelfont 1 labelsize 12
               }
-              menuitem {} {
+              MenuItem {} {
                 label Hermite
                 callback {FlScanZoomFilter=Image_Stream::HERMITE_FILTER;}
                 xywh {45 45 100 20} labelfont 1 labelsize 12
               }
-              menuitem {} {
+              MenuItem {} {
                 label Hanning
                 callback {FlScanZoomFilter=Image_Stream::HANNING_FILTER;}
                 xywh {55 55 100 20} labelfont 1 labelsize 12
               }
-              menuitem {} {
+              MenuItem {} {
                 label Hamming
                 callback {FlScanZoomFilter=Image_Stream::HAMMING_FILTER;}
                 xywh {65 65 100 20} labelfont 1 labelsize 12
               }
-              menuitem {} {
+              MenuItem {} {
                 label Blackman
                 callback {FlScanZoomFilter=Image_Stream::BLACKMAN_FILTER;}
                 xywh {75 75 100 20} labelfont 1 labelsize 12
               }
-              menuitem {} {
+              MenuItem {} {
                 label Gaussian
                 callback {FlScanZoomFilter=Image_Stream::GAUSSIAN_FILTER;}
                 xywh {85 85 100 20} labelfont 1 labelsize 12
               }
-              menuitem {} {
+              MenuItem {} {
                 label Quadratic
                 callback {FlScanZoomFilter=Image_Stream::QUADRATIC_FILTER;}
                 xywh {95 95 100 20} labelfont 1 labelsize 12
               }
-              menuitem {} {
+              MenuItem {} {
                 label Cubic
                 callback {FlScanZoomFilter=Image_Stream::CUBIC_FILTER;}
                 xywh {105 105 100 20} labelfont 1 labelsize 12
               }
-              menuitem {} {
+              MenuItem {} {
                 label Catrom
                 callback {FlScanZoomFilter=Image_Stream::CATROM_FILTER;}
                 xywh {115 115 100 20} labelfont 1 labelsize 12
               }
-              menuitem {} {
+              MenuItem {} {
                 label Mitchell
                 callback {FlScanZoomFilter=Image_Stream::MITCHELL_FILTER;}
                 xywh {125 125 100 20} labelfont 1 labelsize 12
               }
-              menuitem {} {
+              MenuItem {} {
                 label Lanczos
                 callback {FlScanZoomFilter=Image_Stream::LANCZOS_FILTER;}
                 xywh {135 135 100 20} labelfont 1 labelsize 12
               }
-              menuitem {} {
+              MenuItem {} {
                 label Bessel
                 callback {FlScanZoomFilter=Image_Stream::BESSEL_FILTER;}
                 xywh {145 145 100 20} labelfont 1 labelsize 12
               }
-              menuitem {} {
+              MenuItem {} {
                 label Sinc
                 callback {FlScanZoomFilter=Image_Stream::SINC_FILTER;}
                 xywh {155 155 100 20} labelfont 1 labelsize 12
@@ -1274,12 +1312,12 @@ if (reqres>=0) {
 
 Function {cb_selectoption(Fl_Widget *w, void *v)} {open return_type void
 } {
-  code {SANE_Int opt_num;
+  code {size_t opt_num;
 Fl_Tree_Browser* tree = (Fl_Tree_Browser*)w;
 C_Sane_Option *opt;
 
     if (tree->selected()) {
-        opt_num = (SANE_Int)((Fl_Tree_Item*)(tree->selected()))->data();
+        opt_num = (size_t)((Fl_Tree_Item*)(tree->selected()))->data();
 
         tree->redraw();
         Fl::flush();
@@ -2436,7 +2474,7 @@ int zoomFilter;
                     FlScanTxFileName->value(fname);
                     for (int i=1;i<=FlScanLsOutputGeometries->size();i++) {
                         if (FlScanLsOutputGeometries->selected(i)) {
-                            int geom = (int)FlScanLsOutputGeometries->data(i);
+                            size_t geom = (size_t)FlScanLsOutputGeometries->data(i);
                             if (geom) {
                                 sprintf(msg,"Saving File - %d x %d",geom,geom);
                                 sprintf(strbuf,"%s_%d",fname,geom);
@@ -2570,10 +2608,10 @@ const SANE_Option_Descriptor *sod;
         if (sod->cap&SANE_CAP_ADVANCED) {
             fprintf (stderr, " ADVANCED");
         }
-        if (sod->cap&SANE_CAP_ALWAYS_SETTABLE) {
+/*        if (sod->cap&SANE_CAP_ALWAYS_SETTABLE) {
             fprintf (stderr, " ALWAYS_SETTABLE");
         }
-        fprintf (stderr, " ]\\n");
+*/        fprintf (stderr, " ]\\n");
         fprintf (
             stderr,
             "\\tctyp : %d [%s]\\n",
@@ -3072,7 +3110,7 @@ Function {FlScanDeviceSelection(void)} {open return_type void
 } {
   Fl_Window wDevList {
     label {Device Selection} open
-    xywh {355 193 350 155} type Double modal visible
+    xywh {394 161 350 155} type Double modal visible
   } {
     Fl_Return_Button {} {
       label OK
