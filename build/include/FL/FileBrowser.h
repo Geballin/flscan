@@ -22,7 +22,7 @@ public:
   {
       cur_directory_ = (char*)0;
   }
-  int load(const char *directory, Fl_File_Sort_F *sort = fl_numericsort)
+  void load(const char *directory, Fl_File_Sort_F *sort = fl_numericsort)
   {
       cur_directory_ = directory;
       this->Fl_File_Browser::load(directory,sort);
