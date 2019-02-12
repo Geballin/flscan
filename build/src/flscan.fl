@@ -277,7 +277,7 @@ Function {makeFlSCAN(bool enable_scan)} {open
     } else {
         FlScanTxFileName->value("");
     }
-    FlScanTxFileName->do_callback();} selected
+    FlScanTxFileName->do_callback();}
               image {./pixmaps/file.xpm} xywh {465 355 20 20} box ENGRAVED_BOX hide
               code0 {\#include <FL/Fl_File_Chooser.H>}
             }
@@ -1766,7 +1766,7 @@ const SANE_Option_Descriptor *sod;
 Function {FlScanSelOption()} {open return_type void
 } {
   code {int i,d;
-char *curdevice=0,*message=0;
+const char *curdevice=0,*message=0;
 Fl_Group *group=0;
 C_Sane_Value val;
 static char buff[256];
@@ -2126,7 +2126,8 @@ static char buff[256];
                 FlScanShowOption(FlScanSaneLogo,NULL,"Powered by...");
                 break;
         }
-    }} {}
+    }} {selected
+  }
 }
 
 Function {FlScanShowOption(Fl_Group *w,const char *l,const char *t)} {open return_type void

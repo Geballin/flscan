@@ -3697,7 +3697,7 @@ void FlScanSaneSetCB(bool automatic) {
 
 void FlScanSelOption() {
   int i,d;
-  char *curdevice=0,*message=0;
+  const char *curdevice=0,*message=0;
   Fl_Group *group=0;
   C_Sane_Value val;
   static char buff[256];

@@ -39,8 +39,8 @@ private:
     void (*progressCb_)(int);
 public:
     virtual ~OutputImageFile() {}
-    virtual char *filter()=0;
-    virtual char *extension()=0;
+    virtual const char *filter()=0;
+    virtual const char *extension()=0;
     virtual void set_quality(int quality)=0;
     virtual void set_smoothing(int smoothing)=0;
     virtual void set_optimization(int optimization)=0;
@@ -82,8 +82,8 @@ private:
 public:
     Output_JPEG();
     ~Output_JPEG();
-    char *filter();
-    char *extension();
+    const char *filter();
+    const char *extension();
     void begin_image(int w,int h,bool iscolor);
     void add_row(unsigned char *line);
     void flush_image();
@@ -122,8 +122,8 @@ private:
 public:
     Output_PNG();
     ~Output_PNG();
-    char *filter();
-    char *extension();
+    const char *filter();
+    const char *extension();
     void begin_image(int w,int h,bool iscolor);
     void add_row(unsigned char *line);
     void flush_image();

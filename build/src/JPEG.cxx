@@ -193,11 +193,11 @@ Output_JPEG::~Output_JPEG()
     // }
     // image_data_=0;
 }
-char *Output_JPEG::filter()
+const char *Output_JPEG::filter()
 {
     return "*.{jpg|jpeg}";
 }
-char *Output_JPEG::extension()
+const char *Output_JPEG::extension()
 {
     return ".jpg";
 }

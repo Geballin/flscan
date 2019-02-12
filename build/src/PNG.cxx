@@ -233,11 +233,11 @@ Output_PNG::~Output_PNG()
     // }
     // image_data_=0;
 }
-char *Output_PNG::filter()
+const char *Output_PNG::filter()
 {
     return "*.png";
 }
-char *Output_PNG::extension()
+const char *Output_PNG::extension()
 {
     return ".png";
 }
