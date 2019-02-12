@@ -265,7 +265,7 @@ static char buff[256];
 void C_Sane::devicename(char *dev)
 {
     if (devicename_) {
-        delete devicename_;
+      free(devicename_);
     }
     if (dev && strlen(dev)) {
         devicename_=strdup(dev);
@@ -291,7 +291,7 @@ C_Sane::C_Sane(char *devname, char *host, SANE_Auth_Callback auth_cb)
 C_Sane::~C_Sane()
 {
     if (hostname_) {
-        delete hostname_;
+      free(hostname_);
     }
     sane_exit();
 }
@@ -313,7 +313,7 @@ void C_Sane::hostname(char *host)
 char envbuf[1024];
 
     if (hostname_) {
-        delete hostname_;
+        free(hostname_);
         hostname_=0;
     }
     if (host) {
