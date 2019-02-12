@@ -290,9 +290,9 @@ void Image_Stream::matrix(const double **m)
 }
 Image_Stream::~Image_Stream() {
     if (imst_data_) {
-        delete imst_data_;
+      free(imst_data_);
     }
-    imst_data_=0;
+    imst_data_=nullptr;
 }
 bool Image_Stream::begin(int image_width,int bit_depth,bool iscolor) {
     reset();
@@ -417,9 +417,9 @@ Matrix lm = {{0.0,0.0,0.0},{0.0,0.0,0.0},{0.0,0.0,0.0}};
     imst_offset_=0;
     imst_bpp_=0;
     if (imst_data_) {
-        delete imst_data_;
+      free(imst_data_);
     }
-    imst_data_=0;
+    imst_data_=nullptr;
     // identity_matrix(mat_);
 }
 void Image_Stream::undo_rotate()
@@ -512,9 +512,9 @@ double ddx,ddy,dsx,dsy;
 bool use_magick_zoom=false;
 int contribution_x, contribution_y, size, n;
 double density, scale_factor, support, center, start, end;
-ContributionInfo *x_contribution = 0;
-ContributionInfo *y_contribution = 0;
-ContributionInfo *contribution   = 0;
+ContributionInfo *x_contribution = nullptr;
+ContributionInfo *y_contribution = nullptr;
+ContributionInfo *contribution   = nullptr;
 
     if (!add_row) {
         return refresh;

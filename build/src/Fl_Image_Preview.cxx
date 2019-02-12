@@ -259,8 +259,8 @@ Fl_Image_Preview::Fl_Image_Preview(int x,int y,int w,int h,char *l)
 {
     set_horizont_=false;
     set_horizont_tb_=0;
-    row_buffer_=0;
-    preview_data_=0;
+    row_buffer_=nullptr;
+    preview_data_=nullptr;
     newcols_=0;
     newrows_=0;
     off_screen_id_=0;
@@ -270,21 +270,21 @@ Fl_Image_Preview::Fl_Image_Preview(int x,int y,int w,int h,char *l)
 }
 Fl_Image_Preview::~Fl_Image_Preview() {
     if (row_buffer_) {
-        delete row_buffer_;
+      free(row_buffer_);
     }
-    row_buffer_=0;
+    row_buffer_=nullptr;
     if (preview_data_) {
-        delete preview_data_;
+      free(preview_data_);
     }
-    preview_data_=0;
+    preview_data_=nullptr;
 }
 void Fl_Image_Preview::begin_image(int w,int h,bool iscolor)
 {
     newrows_=0; newcols_=0;
     if (preview_data_) {
-        delete preview_data_;
+      free(preview_data_);
     }
-    preview_data_ = 0;
+    preview_data_ = nullptr;
     imgv_w_=w;
     imgv_h_=h;
     imgv_color_=(iscolor)?1:0;
