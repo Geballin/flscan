@@ -172,7 +172,6 @@ SANE_Int info;
 void *C_Sane_Option::value(void *val,SANE_Action action)
 {
     if (value_) {
-        // delete value_;
         value_=0;
     }
     status_ = SANE_STATUS_INVAL;
