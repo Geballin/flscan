@@ -30,7 +30,7 @@
 void Image_Conversion::operator =(Image_Conversion& i)
 {
     if (filename_) {
-        delete filename_;
+      free(filename_);
     }
     filename_=0;
     if (i.filename()) {
@@ -58,10 +58,10 @@ Image_Conversion::Image_Conversion(char *fn,int wdt,int hgt)
 Image_Conversion::~Image_Conversion()
 {
     if (filename_) {
-        delete filename_;
+      free(filename_);
     }
     if (message_) {
-        delete message_;
+      free(message_);
     }
 }
 
@@ -83,7 +83,7 @@ void Image_Conversion::progress(int i)
 void Image_Conversion::message(const char *msg)
 {
     if (message_) {
-        delete message_;
+      free(message_);
     }
     message_ = 0;
     if (msg) {
