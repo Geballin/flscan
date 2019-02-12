@@ -89,7 +89,6 @@ void draw_cross(int xmin,int ymin,int xx,int yy,int xmax,int ymax)
         ) {
             return;
         }
-        // erase_cross();
         pxmin=xmin;
         pymin=ymin; 
         pxmax=xmax;
@@ -235,20 +234,11 @@ void Fl_Image_Preview::flip_horizontal()
 }
 void Fl_Image_Preview::draw()
 {
-// unsigned char *buf=0;
-
     if (visible() && active()) {
         first_draw=false;
         erase_cross();
         erase_box();
         if (refresh_) {
-/*
-            newrows_=0; newcols_=0;
-            if (preview_data_) {
-                delete preview_data_;
-            }
-            preview_data_ = 0;
-*/
             Image_Preview_setCurrent(this);
             if (
                 this->Image_Stream::serialize (
@@ -261,11 +251,6 @@ void Fl_Image_Preview::draw()
                 damage(FL_DAMAGE_ALL);
                 draw_image();
             }
-/*
-            if (buf) {
-                delete buf;
-            }
-*/
         }
     }
 }
