@@ -104,10 +104,10 @@ public:
     ~Fl_Curve()
     {
         if (point_) {
-            delete point_;
+            delete[] point_;
         }
         if (ctlpoint_) {
-            delete ctlpoint_;
+            delete[] ctlpoint_;
         }
     }
     int handle(int);

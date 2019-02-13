@@ -68,7 +68,7 @@ int i, k;
     for (k=n-2;k>=0;--k) {
         y2[k]=y2[k]*y2[k+1]+u[k];
     }
-    delete u;
+    delete[] u;
 }
 double Fl_Curve::spline_eval (
     int n,
@@ -128,7 +128,7 @@ int i;
                           height
                       );
     }
-    delete vector;
+    delete[] vector;
 }
 void Fl_Curve::cursor(Fl_Cursor c)
 {
@@ -617,7 +617,7 @@ int dst, i, x, next, num_active_ctlpoints = 0, first_active = -1;
                 if (ry>max_y_) ry=max_y_;
                 vector[x] = ry;
             }
-            delete mem;
+            delete[] mem;
             break;
         case Fl_Curve::LINEAR:
             dx = (max_x_-min_x)/(veclen-1);
