@@ -243,7 +243,7 @@ bool enable_scan=true;
         (SANE_Auth_Callback)auth_callback
     );
     if (sane_host) {
-        delete sane_host;
+      free(sane_host);
     }
     if (sane) {
         if (sane->status()!=SANE_STATUS_GOOD) {
