@@ -311,7 +311,7 @@ void Image_Stream::rewind() {
     imst_x_=0;
 }
 bool Image_Stream::add_row_data(unsigned char *row_data,int data_len,int frame) {
-int i,j;
+int i;
 unsigned char mask;
 
     if (
@@ -324,16 +324,14 @@ unsigned char mask;
             case FRAME_GRAY:
                 if (imst_bpp_==1) {
                     for (i=0;i<data_len;i++) {
-                        for (j=7;j>=0;j++) {
-                            mask=(row_data[i]&(1<<j))?0x00:0xff;
+			  int j=7;
+			  do {
+                            mask=(row_data[i]&(1<<++j))?0x00:0xff;
                             imst_data_[imst_offset_++] = mask;
-                            if (++imst_x_ >= imst_w_) {
-                                if (!update_height()) {
-                                    return false;
-                                }
-                                break; // skip padding bits
-                            }
-                        }
+			  } while(++imst_x_ >= imst_w_);
+                          if (!update_height()) {
+			    return false;
+			  }
                     }
                 } else {
                     for (i=0;i<data_len;i++) {
@@ -364,7 +362,7 @@ unsigned char mask;
                 if (imst_bpp_==1) {
                     for (i=0;i<data_len;i++) {
                         mask = row_data[i];
-                        for (j=0;i<8;j++) {
+                        for (int j=0;i<8;j++) {
                             imst_data_[imst_offset_++] = (mask&1)?0xff:0x00;
                             imst_offset_ += 3;
                             mask >>= 1;
