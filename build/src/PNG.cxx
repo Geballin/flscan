@@ -56,7 +56,7 @@ Output_PNG_Thread::Output_PNG_Thread(char *filein)
 Output_PNG_Thread::~Output_PNG_Thread()
 {
     if (scratchfile_) {
-        delete scratchfile_;
+      free(scratchfile_);
     }
     printf("Deleting Thread\n");
 }
@@ -225,9 +225,9 @@ Output_PNG::Output_PNG()
 Output_PNG::~Output_PNG()
 {
     if (outfile_) {
-        delete outfile_;
+      free(outfile_);
     }
-    outfile_=0;
+    outfile_=nullptr;
     // if (image_data_) {
         // delete image_data_;
     // }
@@ -327,9 +327,9 @@ void Output_PNG::set_optimization(int optimization)
 void Output_PNG::set_out_file(const char *s)
 {
     if (outfile_) {
-        delete outfile_;
+      free(outfile_);
     }
-    outfile_=0;
+    outfile_=nullptr;
     if (s) {
         outfile_=strdup(s);
     }
