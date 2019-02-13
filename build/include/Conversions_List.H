@@ -35,7 +35,7 @@ private:
     int h_;
     int progress_;
     int visual_;
-    const char *message_;
+    char *message_;
     Image_Conversion* next_;
     Image_Conversion* prec_;
 public:
