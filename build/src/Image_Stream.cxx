@@ -248,8 +248,8 @@ size_t extra_size, offset;
     imst_x_=0;
     imst_y_++;
     if (imst_y_>=imst_h_) {
-        offset = imst_depth_*imst_w_*imst_h_;
-        extra_size = imst_depth_*MIN_BUFF_ROWS*imst_w_;
+      offset = (size_t)imst_depth_*imst_w_*imst_h_;
+      extra_size = (size_t)imst_depth_*MIN_BUFF_ROWS*imst_w_;
         imst_h_+=MIN_BUFF_ROWS;
         imst_data_=(unsigned char*)realloc (
             (void*)imst_data_,
