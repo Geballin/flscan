@@ -32,7 +32,7 @@ void Image_Conversion::operator =(Image_Conversion& i)
     if (filename_) {
       free(filename_);
     }
-    filename_=0;
+    filename_=nullptr;
     if (i.filename()) {
         filename_=strdup(i.filename());
     }
@@ -49,10 +49,10 @@ Image_Conversion::Image_Conversion(char *fn,int wdt,int hgt)
     }
     w_=wdt;
     h_=hgt;
-    message_=0;
+    message_=nullptr;
     progress_=0;
-    next_=0;
-    prec_=0;
+    next_=nullptr;
+    prec_=nullptr;
 }
 
 Image_Conversion::~Image_Conversion()
@@ -85,7 +85,7 @@ void Image_Conversion::message(const char *msg)
     if (message_) {
       free(message_);
     }
-    message_ = 0;
+    message_ = nullptr;
     if (msg) {
         message_ = strdup(msg);
     }
@@ -135,7 +135,7 @@ int i;
 Image_Conversion *cnv,*cnv1,*cnvf;
 
     i=0;
-    cnvf=0;
+    cnvf=nullptr;
     cnv=first;
     while (cnv) {
         if (i==R) {
@@ -158,7 +158,7 @@ static const char *header[3] = {
 const char *Conversions_List::get_value(int R,int C)
 {
 Image_Conversion *cnv;
-const char *value=0;
+const char *value=nullptr;
 
     if (R==-1) {
         value=header[C];
@@ -171,8 +171,8 @@ const char *value=0;
 Conversions_List::Conversions_List(int X,int Y,int W,int H,const char *l)
 :Flv_Table(X,Y,W,H,l)
 {
-    first=0;
-    last=0;
+    first=nullptr;
+    last=nullptr;
     //    row height (17) * rows (10) +
     //    row height headers (17+4) * number of headers (3) +
     //    Top/Bottom box margins (2)
