@@ -326,13 +326,7 @@ unsigned char mask;
                     for (i=0;i<data_len;i++) {
                         for (j=7;j>=0;j++) {
                             mask=(row_data[i]&(1<<j))?0x00:0xff;
-#if 1
                             imst_data_[imst_offset_++] = mask;
-#else
-                            imst_data_[imst_offset_++] = mask;
-                            imst_data_[imst_offset_++] = mask;
-                            imst_data_[imst_offset_++] = mask;
-#endif
                             if (++imst_x_ >= imst_w_) {
                                 if (!update_height()) {
                                     return false;
@@ -343,13 +337,7 @@ unsigned char mask;
                     }
                 } else {
                     for (i=0;i<data_len;i++) {
-#if 1
                         imst_data_[imst_offset_++] = row_data[i];
-#else
-                        imst_data_[imst_offset_++] = row_data[i];
-                        imst_data_[imst_offset_++] = row_data[i];
-                        imst_data_[imst_offset_++] = row_data[i];
-#endif
                         if (++imst_x_ >= imst_w_ && !update_height()) {
                             return false;
                         }
