@@ -169,7 +169,7 @@ png_color_8 sig_bit;
                             last_progress=progress;
                         }
                     }
-                    delete data;
+                    delete[] data;
                     FL_LOCK_BEGIN();
                         pconv=FlScanConversionArea->get(sequence_number);
                         if (pconv) {
@@ -408,7 +408,7 @@ int iscolor;
                 );
             }
             png_read_end(png_ptr,NULL);
-            delete ibuffer;
+            delete[] ibuffer;
         }
         png_destroy_read_struct(&png_ptr,&info_ptr,NULL);
         read_cb(NULL,0,0,0,2);

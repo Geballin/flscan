@@ -135,7 +135,7 @@ char *filein;
                         last_progress=progress;
                     }
                 }
-                delete data;
+                delete[] data;
                 FL_LOCK_BEGIN();
                     pconv=FlScanConversionArea->get(sequence_number);
                     if (pconv) {
@@ -356,7 +356,7 @@ long width,height,components;
                 );
             }
             jpeg_finish_decompress(&cinfo);
-            delete ibuffer;
+            delete[] ibuffer;
         }
         jpeg_destroy_decompress(&cinfo);
         read_cb(NULL,0,0,0,2);

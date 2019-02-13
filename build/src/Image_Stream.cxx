@@ -757,13 +757,13 @@ ContributionInfo *contribution   = nullptr;
         refresh = true;
     }
     if (x_contribution) {
-        delete x_contribution;
+        delete[] x_contribution;
     }
     if (y_contribution) {
-        delete y_contribution;
+        delete[] y_contribution;
     }
     if (contribution) {
-        delete contribution;
+        delete[] contribution;
     }
     return refresh;
 }
