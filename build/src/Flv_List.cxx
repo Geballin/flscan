@@ -456,7 +456,7 @@ void Flv_List::get_style(Flv_Style &s, int R, int )
 	if (rows && R<0)
   {
 		rows = rows->cell_style.skip_to(0);
-	  if (rows && R<0)
+	  if (rows)
   	  s = *rows;
   }
 }
