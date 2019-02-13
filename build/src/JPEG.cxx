@@ -50,7 +50,7 @@ Output_JPEG_Thread::Output_JPEG_Thread(char *filein)
 Output_JPEG_Thread::~Output_JPEG_Thread()
 {
     if (scratchfile_) {
-        delete scratchfile_;
+      free(scratchfile_);
     }
     printf("Deleting Thread\n");
 }
@@ -185,7 +185,7 @@ Output_JPEG::Output_JPEG()
 Output_JPEG::~Output_JPEG()
 {
     if (outfile_) {
-        delete outfile_;
+      free(outfile_);
     }
     outfile_=0;
     // if (image_data_) {
@@ -314,7 +314,7 @@ void Output_JPEG::set_optimization(int optimization)
 void Output_JPEG::set_out_file(const char *s)
 {
     if (outfile_) {
-        delete outfile_;
+      free(outfile_);
     }
     outfile_=0;
     if (s) {
