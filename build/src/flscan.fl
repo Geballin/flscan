@@ -128,7 +128,7 @@ decl {char *scan_buf=0;} {private local
 decl {Output_File FlScanOutputFile;} {private local
 }
 
-decl {extern char *copyrightText;} {public local
+decl {extern const char *copyrightText;} {public local
 }
 
 decl {int FlScanZoomFilter=Image_Stream::UNDEFINED_FILTER;} {private local
@@ -2126,8 +2126,7 @@ static char buff[256];
                 FlScanShowOption(FlScanSaneLogo,NULL,"Powered by...");
                 break;
         }
-    }} {selected
-  }
+    }} {}
 }
 
 Function {FlScanShowOption(Fl_Group *w,const char *l,const char *t)} {open return_type void
@@ -3088,7 +3087,7 @@ int exit=0;
     return allSaved;} {}
 }
 
-Function {make_copyright_window(char *copyright)} {open
+Function {make_copyright_window(const char *copyright)} {open
 } {
   Fl_Window {} {
     label {FlScan Copyright} open
@@ -3099,7 +3098,7 @@ Function {make_copyright_window(char *copyright)} {open
       callback {((Fl_Window*)(o->parent()))->hide();}
       xywh {5 320 340 25} labelfont 1
     }
-    Fl_Help_View {} {
+    Fl_Help_View {} {selected
       xywh {5 5 340 310} box THIN_DOWN_BOX
       code0 {o->value(copyright);}
     }

@@ -10,7 +10,7 @@
 extern Trigger running;
 extern C_Sane *sane;
 extern char *sane_host;
-extern char *copyrightText;
+extern const char *copyrightText;
 
 class EatEvent : public Fl_Box {
 public:

@@ -10,7 +10,7 @@
 extern Trigger running; 
 extern C_Sane *sane; 
 extern char *sane_host; 
-extern char *copyrightText;
+extern const char *copyrightText;
 
 class EatEvent : public Fl_Box {
 public:
@@ -190,7 +190,7 @@ bool FlScanReadImageCB(unsigned char *row,int w,int d,int c,int m);
 bool FlScanCheckForImagesNotSaved();
 #include <FL/Fl_Return_Button.H>
 #include <FL/Fl_Help_View.H>
-Fl_Double_Window* make_copyright_window(char *copyright);
+Fl_Double_Window* make_copyright_window(const char *copyright);
 extern Fl_Double_Window *wDevList;
 extern Fl_Browser *lsDevList;
 void FlScanDeviceSelection(void);

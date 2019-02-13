@@ -26,7 +26,7 @@
 #include "flscan.h"
 #include <string.h>
 
-char *copyrightText = 
+const char *copyrightText = 
 "<HTML><BODY><CENTER>"
 "<B>FlScan 1.0.2</B><BR>"
 "a new FLTK SANE frontend<BR>"

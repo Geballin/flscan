@@ -4998,7 +4998,7 @@ static void cb_OK(Fl_Return_Button* o, void*) {
   ((Fl_Window*)(o->parent()))->hide();
 }
 
-Fl_Double_Window* make_copyright_window(char *copyright) {
+Fl_Double_Window* make_copyright_window(const char *copyright) {
   Fl_Double_Window* w;
   { Fl_Double_Window* o = new Fl_Double_Window(350, 350, gettext("FlScan Copyright"));
     w = o; if (w) {/* empty */}
