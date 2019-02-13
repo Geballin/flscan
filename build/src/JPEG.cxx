@@ -69,7 +69,7 @@ int now,max,progress,last_progress;
 char *filein;
 
     FL_TOGGLE_THREAD();
-    filein=0;
+    filein=nullptr;
     FL_LOCK_BEGIN();
         if (scratchfile_ && scratchfile_[0]!='\0') {
             filein=strdup(scratchfile_);
@@ -170,7 +170,7 @@ Output_JPEG::Output_JPEG()
     FL_LOCK_BEGIN();
         scratchfile_[0]='\0';
     FL_LOCK_END((void*)0);
-    pfscratch_=0;
+    pfscratch_=nullptr;
     image_w_=0;
     image_h_=0;
     image_iscolor_=0;
@@ -178,7 +178,7 @@ Output_JPEG::Output_JPEG()
     image_quality_=100;
     image_smoothing_=100;
     image_optimization_=1;
-    outfile_=0;
+    outfile_=nullptr;
     // image_data_=0;
     // image_pntr_=0;
 }
@@ -187,7 +187,7 @@ Output_JPEG::~Output_JPEG()
     if (outfile_) {
       free(outfile_);
     }
-    outfile_=0;
+    outfile_=nullptr;
     // if (image_data_) {
         // delete image_data_;
     // }
@@ -316,7 +316,7 @@ void Output_JPEG::set_out_file(const char *s)
     if (outfile_) {
       free(outfile_);
     }
-    outfile_=0;
+    outfile_=nullptr;
     if (s) {
         outfile_=strdup(s);
     }

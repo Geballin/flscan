@@ -75,7 +75,7 @@ char *filein;
 png_color_8 sig_bit;
 
     FL_TOGGLE_THREAD();
-    filein=0;
+    filein=nullptr;
     FL_LOCK_BEGIN();
         if (scratchfile_ && scratchfile_[0]!='\0') {
             filein=strdup(scratchfile_);
@@ -210,7 +210,7 @@ Output_PNG::Output_PNG()
     FL_LOCK_BEGIN();
         scratchfile_[0]='\0';
     FL_LOCK_END((void*)0);
-    pfscratch_=0;
+    pfscratch_=nullptr;
     image_w_=0;
     image_h_=0;
     image_iscolor_=0;
@@ -218,7 +218,7 @@ Output_PNG::Output_PNG()
     image_quality_=9;
     image_smoothing_=0;
     image_optimization_=0;
-    outfile_=0;
+    outfile_=nullptr;
     // image_data_=0;
     // image_pntr_=0;
 }
