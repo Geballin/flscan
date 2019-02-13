@@ -230,8 +230,8 @@ bool enable_scan=true;
     FL_LOCK_BEGIN()
     FL_TOGGLE_THREAD()
 
-    sane=0;
-    sane_host=0;
+    sane=nullptr;
+    sane_host=nullptr;
     loadIcons();
     Fl::add_handler(handle);
     if (argc>2 && argv[2] && strlen(argv[2])) {
