@@ -178,8 +178,8 @@ const char *pStrProgress;
         FlScanEeWaitForSaving->redraw();
         sleep(1);
     }
-    FlScanPbExit->do_callback();
-    FL_TOGGLE_THREAD();} {}
+    FL_TOGGLE_THREAD();} {selected
+    }
   }
   Function {ImageSavingMonitor()} {open C
   } {
@@ -1139,50 +1139,28 @@ angle of the rubber line near 0° or 90°.} image {./pixmaps/set_horizont.xpm} xyw
           }
           Fl_Button FlScanPreviewZoomPlus {
             callback {FlScanResize(INCREASE_SIZE);}
-            tooltip {Increase Window Size} image {./pixmaps/zoom_in.xpm} xywh {330 0 25 25} box FLAT_BOX labelfont 1 labelsize 12 align 16
+            tooltip {Increase Window Size} image {./pixmaps/zoom_in.xpm} xywh {355 0 25 25} box FLAT_BOX labelfont 1 labelsize 12 align 16
             code0 {\#include <FL/Fl_RaiseButton.H>}
             code1 {o->hilighted_box(FL_THIN_UP_BOX);}
             class Fl_RaiseButton
           }
           Fl_Button FlScanPreviewZoomMinus {
             callback {FlScanResize(DECREASE_SIZE);}
-            tooltip {Decrease Window Size} image {./pixmaps/zoom_out.xpm} xywh {355 0 25 25} box FLAT_BOX labelfont 1 labelsize 12 align 16
+            tooltip {Decrease Window Size} image {./pixmaps/zoom_out.xpm} xywh {380 0 25 25} box FLAT_BOX labelfont 1 labelsize 12 align 16
             code0 {\#include <FL/Fl_RaiseButton.H>}
             code1 {o->hilighted_box(FL_THIN_UP_BOX);}
             class Fl_RaiseButton
           }
           Fl_Button FlScanPreviewZoomScreen {
             callback {FlScanResize(FIT_TO_SCREEN);}
-            tooltip {Fit Window Size to Screen Size} image {./pixmaps/zoom_undo.xpm} xywh {380 0 25 25} box FLAT_BOX labelfont 1 labelsize 12 align 16
+            tooltip {Fit Window Size to Screen Size} image {./pixmaps/zoom_undo.xpm} xywh {405 0 25 25} box FLAT_BOX labelfont 1 labelsize 12 align 16
             code0 {\#include <FL/Fl_RaiseButton.H>}
             code1 {o->hilighted_box(FL_THIN_UP_BOX);}
             class Fl_RaiseButton
           }
           Fl_Button FlScanPreviewZoomMinimize {
             callback {FlScanResize(0);}
-            tooltip {Resize Window to Minimum Size} image {./pixmaps/zoom_mini.xpm} xywh {405 0 25 25} box FLAT_BOX labelfont 1 labelsize 12 align 16
-            code0 {\#include <FL/Fl_RaiseButton.H>}
-            code1 {o->hilighted_box(FL_THIN_UP_BOX);}
-            class Fl_RaiseButton
-          }
-          Fl_Button FlScanPbExit {
-            callback {if (FlScanCheckForImagesNotSaved()) {
-    FlScanSaveSettings();
-    FlScanSaveCurrentDevice();
-    delete sane;
-    exit(0);
-}}
-            tooltip {Terminate Fl Scan} image {./pixmaps/zoom_quit.xpm} xywh {430 0 25 25} box FLAT_BOX labelfont 1 labelsize 12 align 16
-            code0 {\#include <FL/Fl_RaiseButton.H>}
-            code1 {o->hilighted_box(FL_THIN_UP_BOX);}
-            class Fl_RaiseButton
-          }
-          Fl_Button FlScanShowCopyright {
-            label {©}
-            callback {if (copyrightWindow) {
-    copyrightWindow->show();
-}}
-            tooltip {Show Copyright...} xywh {305 0 25 25} box FLAT_BOX labelfont 1 labelsize 24 align 208
+            tooltip {Resize Window to Minimum Size} image {./pixmaps/zoom_mini.xpm} xywh {430 0 25 25} box FLAT_BOX labelfont 1 labelsize 12 align 16
             code0 {\#include <FL/Fl_RaiseButton.H>}
             code1 {o->hilighted_box(FL_THIN_UP_BOX);}
             class Fl_RaiseButton
@@ -3091,7 +3069,7 @@ int exit=0;
 Function {make_copyright_window(const char *copyright)} {open
 } {
   Fl_Window {} {
-    label {FlScan Copyright} open selected
+    label {FlScan Copyright} open
     xywh {154 527 350 350} type Double
     code0 {Fl_RGB_Image rgb_sane((const Fl_Pixmap*)image_sane());o->icon(&rgb_sane);} modal visible
   } {

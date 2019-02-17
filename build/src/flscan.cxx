@@ -77,7 +77,6 @@ void ImageSavingMonitor::thread() {
           FlScanEeWaitForSaving->redraw();
           sleep(1);
       }
-      FlScanPbExit->do_callback();
       FL_TOGGLE_THREAD();
 }
 
@@ -1561,56 +1560,6 @@ static Fl_Image *image_zoom_mini() {
   return image;
 }
 
-Fl_RaiseButton *FlScanPbExit=(Fl_RaiseButton *)0;
-
-static void cb_FlScanPbExit(Fl_RaiseButton*, void*) {
-  if (FlScanCheckForImagesNotSaved()) {
-    FlScanSaveSettings();
-    FlScanSaveCurrentDevice();
-    delete sane;
-    exit(0);
-};
-}
-
-static const char *idata_zoom_quit[] = {
-"    19    19        4            1",
-"  c none",
-"X c gray30",
-"q c black",
-"a c white",
-"  q             q  ",
-" qqq           qqq ",
-"qqqqq         qqqqq",
-" qqqqq       qqqqq ",
-"  qqqqq     qqqqq  ",
-"   qqqqq   qqqqq   ",
-"    qqqqq qqqqq    ",
-"     qqqqqqqqq     ",
-"      qqqqqqq      ",
-"       qqqqq       ",
-"      qqqqqqq      ",
-"     qqqqqqqqq     ",
-"    qqqqq qqqqq    ",
-"   qqqqq   qqqqq   ",
-"  qqqqq     qqqqq  ",
-" qqqqq       qqqqq ",
-"qqqqq         qqqqq",
-" qqq           qqq ",
-"  q             q  "
-};
-static Fl_Image *image_zoom_quit() {
-  static Fl_Image *image = new Fl_Pixmap(idata_zoom_quit);
-  return image;
-}
-
-Fl_RaiseButton *FlScanShowCopyright=(Fl_RaiseButton *)0;
-
-static void cb_FlScanShowCopyright(Fl_RaiseButton*, void*) {
-  if (copyrightWindow) {
-    copyrightWindow->show();
-};
-}
-
 EatEvent *FlScanEeLockView=(EatEvent *)0;
 
 EatEvent *FlScanEeWaitForSaving=(EatEvent *)0;
@@ -3011,7 +2960,7 @@ Fl_Double_Window* makeFlSCAN(bool enable_scan) {
             o->labeltype(FL_NO_LABEL);
             Fl_Group::current()->resizable(o);
           } // Fl_Box* o
-          { Fl_RaiseButton* o = FlScanPreviewZoomPlus = new Fl_RaiseButton(330, 0, 25, 25);
+          { Fl_RaiseButton* o = FlScanPreviewZoomPlus = new Fl_RaiseButton(355, 0, 25, 25);
             FlScanPreviewZoomPlus->tooltip(gettext("Increase Window Size"));
             FlScanPreviewZoomPlus->box(FL_FLAT_BOX);
             FlScanPreviewZoomPlus->color(FL_BACKGROUND_COLOR);
@@ -3026,7 +2975,7 @@ Fl_Double_Window* makeFlSCAN(bool enable_scan) {
             FlScanPreviewZoomPlus->when(FL_WHEN_RELEASE);
             o->hilighted_box(FL_THIN_UP_BOX);
           } // Fl_RaiseButton* FlScanPreviewZoomPlus
-          { Fl_RaiseButton* o = FlScanPreviewZoomMinus = new Fl_RaiseButton(355, 0, 25, 25);
+          { Fl_RaiseButton* o = FlScanPreviewZoomMinus = new Fl_RaiseButton(380, 0, 25, 25);
             FlScanPreviewZoomMinus->tooltip(gettext("Decrease Window Size"));
             FlScanPreviewZoomMinus->box(FL_FLAT_BOX);
             FlScanPreviewZoomMinus->color(FL_BACKGROUND_COLOR);
@@ -3041,7 +2990,7 @@ Fl_Double_Window* makeFlSCAN(bool enable_scan) {
             FlScanPreviewZoomMinus->when(FL_WHEN_RELEASE);
             o->hilighted_box(FL_THIN_UP_BOX);
           } // Fl_RaiseButton* FlScanPreviewZoomMinus
-          { Fl_RaiseButton* o = FlScanPreviewZoomScreen = new Fl_RaiseButton(380, 0, 25, 25);
+          { Fl_RaiseButton* o = FlScanPreviewZoomScreen = new Fl_RaiseButton(405, 0, 25, 25);
             FlScanPreviewZoomScreen->tooltip(gettext("Fit Window Size to Screen Size"));
             FlScanPreviewZoomScreen->box(FL_FLAT_BOX);
             FlScanPreviewZoomScreen->color(FL_BACKGROUND_COLOR);
@@ -3056,7 +3005,7 @@ Fl_Double_Window* makeFlSCAN(bool enable_scan) {
             FlScanPreviewZoomScreen->when(FL_WHEN_RELEASE);
             o->hilighted_box(FL_THIN_UP_BOX);
           } // Fl_RaiseButton* FlScanPreviewZoomScreen
-          { Fl_RaiseButton* o = FlScanPreviewZoomMinimize = new Fl_RaiseButton(405, 0, 25, 25);
+          { Fl_RaiseButton* o = FlScanPreviewZoomMinimize = new Fl_RaiseButton(430, 0, 25, 25);
             FlScanPreviewZoomMinimize->tooltip(gettext("Resize Window to Minimum Size"));
             FlScanPreviewZoomMinimize->box(FL_FLAT_BOX);
             FlScanPreviewZoomMinimize->color(FL_BACKGROUND_COLOR);
@@ -3071,35 +3020,6 @@ Fl_Double_Window* makeFlSCAN(bool enable_scan) {
             FlScanPreviewZoomMinimize->when(FL_WHEN_RELEASE);
             o->hilighted_box(FL_THIN_UP_BOX);
           } // Fl_RaiseButton* FlScanPreviewZoomMinimize
-          { Fl_RaiseButton* o = FlScanPbExit = new Fl_RaiseButton(430, 0, 25, 25);
-            FlScanPbExit->tooltip(gettext("Terminate Fl Scan"));
-            FlScanPbExit->box(FL_FLAT_BOX);
-            FlScanPbExit->color(FL_BACKGROUND_COLOR);
-            FlScanPbExit->selection_color(FL_BACKGROUND_COLOR);
-            FlScanPbExit->image( image_zoom_quit() );
-            FlScanPbExit->labeltype(FL_NORMAL_LABEL);
-            FlScanPbExit->labelfont(1);
-            FlScanPbExit->labelsize(12);
-            FlScanPbExit->labelcolor(FL_FOREGROUND_COLOR);
-            FlScanPbExit->callback((Fl_Callback*)cb_FlScanPbExit);
-            FlScanPbExit->align(Fl_Align(FL_ALIGN_CENTER|FL_ALIGN_INSIDE));
-            FlScanPbExit->when(FL_WHEN_RELEASE);
-            o->hilighted_box(FL_THIN_UP_BOX);
-          } // Fl_RaiseButton* FlScanPbExit
-          { Fl_RaiseButton* o = FlScanShowCopyright = new Fl_RaiseButton(305, 0, 25, 25, gettext("\251"));
-            FlScanShowCopyright->tooltip(gettext("Show Copyright..."));
-            FlScanShowCopyright->box(FL_FLAT_BOX);
-            FlScanShowCopyright->color(FL_BACKGROUND_COLOR);
-            FlScanShowCopyright->selection_color(FL_BACKGROUND_COLOR);
-            FlScanShowCopyright->labeltype(FL_NORMAL_LABEL);
-            FlScanShowCopyright->labelfont(1);
-            FlScanShowCopyright->labelsize(24);
-            FlScanShowCopyright->labelcolor(FL_FOREGROUND_COLOR);
-            FlScanShowCopyright->callback((Fl_Callback*)cb_FlScanShowCopyright);
-            FlScanShowCopyright->align(Fl_Align(192|FL_ALIGN_INSIDE));
-            FlScanShowCopyright->when(FL_WHEN_RELEASE);
-            o->hilighted_box(FL_THIN_UP_BOX);
-          } // Fl_RaiseButton* FlScanShowCopyright
           FlScanToolBar->end();
         } // Fl_Group* FlScanToolBar
         { FlScanEeLockView = new EatEvent(5, 0, 125, 25);

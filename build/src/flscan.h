@@ -143,8 +143,6 @@ extern Fl_RaiseButton *FlScanPreviewZoomPlus;
 extern Fl_RaiseButton *FlScanPreviewZoomMinus;
 extern Fl_RaiseButton *FlScanPreviewZoomScreen;
 extern Fl_RaiseButton *FlScanPreviewZoomMinimize;
-extern Fl_RaiseButton *FlScanPbExit;
-extern Fl_RaiseButton *FlScanShowCopyright;
 extern EatEvent *FlScanEeLockView;
 extern EatEvent *FlScanEeWaitForSaving;
 Fl_Double_Window* makeFlSCAN(bool enable_scan);
