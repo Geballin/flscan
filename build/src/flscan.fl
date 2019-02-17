@@ -3091,8 +3091,9 @@ int exit=0;
 Function {make_copyright_window(const char *copyright)} {open
 } {
   Fl_Window {} {
-    label {FlScan Copyright} open
-    xywh {154 527 350 350} type Double modal visible
+    label {FlScan Copyright} open selected
+    xywh {154 527 350 350} type Double
+    code0 {Fl_RGB_Image rgb_sane((const Fl_Pixmap*)image_sane());o->icon(&rgb_sane);} modal visible
   } {
     Fl_Return_Button {} {
       label OK
@@ -3109,7 +3110,7 @@ Function {make_copyright_window(const char *copyright)} {open
 Function {FlScanDeviceSelection(void)} {open return_type void
 } {
   Fl_Window wDevList {
-    label {Device Selection} open selected
+    label {Device Selection} open
     xywh {859 73 350 155} type Double
     code0 {Fl_RGB_Image rgb_sane((const Fl_Pixmap*)image_sane());wDevList->icon(&rgb_sane);} modal visible
   } {

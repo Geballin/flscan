@@ -5011,6 +5011,7 @@ Fl_Double_Window* make_copyright_window(const char *copyright) {
       o->box(FL_THIN_DOWN_BOX);
       o->value(copyright);
     } // Fl_Help_View* o
+    Fl_RGB_Image rgb_sane((const Fl_Pixmap*)image_sane());o->icon(&rgb_sane);
     o->set_modal();
     o->end();
   } // Fl_Double_Window* o
