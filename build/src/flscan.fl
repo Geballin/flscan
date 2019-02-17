@@ -202,7 +202,7 @@ Function {auth_callback(SANE_String_Const domain,SANE_Char username[SANE_MAX_USE
 Function {makeFlSCAN(bool enable_scan)} {open
 } {
   Fl_Window FlScan {
-    label {Fl Scan} open selected
+    label {Fl Scan} open
     xywh {535 387 640 480} type Double
     code0 {o->size_range(640,480,640,480);}
     code1 {copyrightWindow=make_copyright_window(copyrightText);}
@@ -3109,8 +3109,9 @@ Function {make_copyright_window(const char *copyright)} {open
 Function {FlScanDeviceSelection(void)} {open return_type void
 } {
   Fl_Window wDevList {
-    label {Device Selection} open
-    xywh {859 73 350 155} type Double modal visible
+    label {Device Selection} open selected
+    xywh {859 73 350 155} type Double
+    code0 {Fl_RGB_Image rgb_sane((const Fl_Pixmap*)image_sane());wDevList->icon(&rgb_sane);} modal visible
   } {
     Fl_Return_Button {} {
       label OK

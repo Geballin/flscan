@@ -5037,6 +5037,7 @@ void FlScanDeviceSelection(void) {
       lsDevList->align(Fl_Align(FL_ALIGN_TOP_LEFT));
       lsDevList->when(3);
     } // Fl_Browser* lsDevList
+    Fl_RGB_Image rgb_sane((const Fl_Pixmap*)image_sane());wDevList->icon(&rgb_sane);
     wDevList->set_modal();
     wDevList->end();
   } // Fl_Double_Window* wDevList
