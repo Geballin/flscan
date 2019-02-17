@@ -2818,6 +2818,7 @@ Fl_Double_Window* makeFlSCAN(bool enable_scan) {
             FlScanTabPreview->image( image_Preview() );
             FlScanTabPreview->labelfont(1);
             FlScanTabPreview->labelsize(12);
+            FlScanTabPreview->hide();
             { Fl_Group* o = new Fl_Group(10, 30, 440, 440);
               o->box(FL_DOWN_BOX);
               o->color(FL_BACKGROUND2_COLOR);
@@ -2867,7 +2868,6 @@ Fl_Double_Window* makeFlSCAN(bool enable_scan) {
             FlScanTabView->image( image_Acquire() );
             FlScanTabView->labelfont(1);
             FlScanTabView->labelsize(12);
-            FlScanTabView->hide();
             { FlScanSwViewArea = new Fl_Scrolled_Image(10, 30, 440, 440);
               FlScanSwViewArea->box(FL_DOWN_BOX);
               FlScanSwViewArea->color(FL_BACKGROUND2_COLOR);
@@ -3133,6 +3133,7 @@ Fl_Double_Window* makeFlSCAN(bool enable_scan) {
     } // Fl_Group* FlScanContainer
     o->size_range(640,480,640,480);
     copyrightWindow=make_copyright_window(copyrightText);
+    Fl_RGB_Image rgb_sane((const Fl_Pixmap*)image_sane());o->icon(&rgb_sane);
     FlScan->set_modal();
     FlScan->end();
   } // Fl_Double_Window* FlScan

@@ -202,10 +202,11 @@ Function {auth_callback(SANE_String_Const domain,SANE_Char username[SANE_MAX_USE
 Function {makeFlSCAN(bool enable_scan)} {open
 } {
   Fl_Window FlScan {
-    label {Fl Scan} open
-    xywh {610 319 640 480} type Double
+    label {Fl Scan} open selected
+    xywh {535 387 640 480} type Double
     code0 {o->size_range(640,480,640,480);}
-    code1 {copyrightWindow=make_copyright_window(copyrightText);} modal visible
+    code1 {copyrightWindow=make_copyright_window(copyrightText);}
+    code2 {Fl_RGB_Image rgb_sane((const Fl_Pixmap*)image_sane());o->icon(&rgb_sane);} modal visible
   } {
     Fl_Group FlScanContainer {open
       xywh {0 0 640 480}
@@ -687,7 +688,7 @@ FlScanHistogramTgPixel->do_callback();}
               code0 {FlScanSliderGlue(FlScanFFmtSlCompressionPNG,FlScanFFmtTxCompressionPNG,SLIDER_TO_TEXT);}
             }
           }
-          Fl_Group FlScanSaneLogo {
+          Fl_Group FlScanSaneLogo {open
             image {./pixmaps/sane-logo-4.xpm} xywh {460 205 175 145} box THIN_DOWN_BOX align 17
           } {
             Fl_Box {} {
@@ -1033,7 +1034,7 @@ FlScanHistogramTgPixel->do_callback();}
             }
           }
           Fl_Group FlScanTabPreview {open
-            tooltip {Image Previewer} image {./pixmaps/Preview.xpm} xywh {5 25 450 450} box THIN_UP_BOX labelfont 1 labelsize 12
+            tooltip {Image Previewer} image {./pixmaps/Preview.xpm} xywh {5 25 450 450} box THIN_UP_BOX labelfont 1 labelsize 12 hide
           } {
             Fl_Group {} {open
               xywh {10 30 440 440} box DOWN_BOX color 7 labeltype NO_LABEL resizable
@@ -1057,7 +1058,7 @@ FlScanHistogramTgPixel->do_callback();}
             }
           }
           Fl_Group FlScanTabView {open
-            tooltip {Image Viewer} image {./pixmaps/Acquire.xpm} xywh {5 25 450 450} box THIN_UP_BOX labelfont 1 labelsize 12 hide
+            tooltip {Image Viewer} image {./pixmaps/Acquire.xpm} xywh {5 25 450 450} box THIN_UP_BOX labelfont 1 labelsize 12
           } {
             Fl_Scroll FlScanSwViewArea {open
               xywh {10 30 440 440} box DOWN_BOX color 7 labeltype NO_LABEL resizable
@@ -3098,7 +3099,7 @@ Function {make_copyright_window(const char *copyright)} {open
       callback {((Fl_Window*)(o->parent()))->hide();}
       xywh {5 320 340 25} labelfont 1
     }
-    Fl_Help_View {} {selected
+    Fl_Help_View {} {
       xywh {5 5 340 310} box THIN_DOWN_BOX
       code0 {o->value(copyright);}
     }
