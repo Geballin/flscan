@@ -229,7 +229,7 @@ bool enable_scan=true;
 
     FL_LOCK_BEGIN()
     FL_TOGGLE_THREAD()
-
+    Fl::scheme("gtk+"); 
     sane=nullptr;
     sane_host=nullptr;
     loadIcons();
