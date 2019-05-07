@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0304
+version 1.0305
 i18n_type 1
 i18n_include <libintl.h>
 i18n_function gettext
@@ -178,8 +178,7 @@ const char *pStrProgress;
         FlScanEeWaitForSaving->redraw();
         sleep(1);
     }
-    FL_TOGGLE_THREAD();} {selected
-    }
+    FL_TOGGLE_THREAD();} {}
   }
   Function {ImageSavingMonitor()} {open C
   } {
@@ -206,7 +205,7 @@ Function {makeFlSCAN(bool enable_scan)} {open
     xywh {610 319 640 480} type Double
     code0 {o->size_range(640,480,640,480);}
     code1 {copyrightWindow=make_copyright_window(copyrightText);}
-    code2 {Fl_RGB_Image rgb_sane((const Fl_Pixmap*)image_sane());o->icon(&rgb_sane);}
+    code2 {Fl_RGB_Image rgb_sane((const Fl_Pixmap*)image_sane());o->icon(&rgb_sane);} visible
   } {
     Fl_Group FlScanContainer {open
       xywh {0 0 640 480}
@@ -688,20 +687,12 @@ FlScanHistogramTgPixel->do_callback();}
               code0 {FlScanSliderGlue(FlScanFFmtSlCompressionPNG,FlScanFFmtTxCompressionPNG,SLIDER_TO_TEXT);}
             }
           }
-          Fl_Group FlScanSaneLogo {
+          Fl_Group FlScanSaneLogo {open
             image {./pixmaps/sane-logo-4.xpm} xywh {460 205 175 145} box THIN_DOWN_BOX align 17
           } {
             Fl_Box {} {
-              label {FlScan 1.0.2}
+              label {FlScan 1.0.2} selected
               xywh {465 210 165 65} labeltype SHADOW_LABEL labelfont 1 labelsize 24 labelcolor 3
-            }
-            Fl_Box {} {
-              label {©2001-2003 by}
-              xywh {465 310 165 20} labeltype SHADOW_LABEL labelfont 1 labelcolor 3 align 16
-            }
-            Fl_Box {} {
-              label {Francesco Bradascio}
-              xywh {461 329 173 20} labeltype SHADOW_LABEL labelfont 1 labelcolor 3 align 128
             }
             Fl_Button showCopyright {
               callback {if (copyrightWindow) {
@@ -3078,7 +3069,7 @@ Function {make_copyright_window(const char *copyright)} {open
       callback {((Fl_Window*)(o->parent()))->hide();}
       xywh {5 320 340 25} labelfont 1
     }
-    Fl_Help_View {} {selected
+    Fl_Help_View {} {
       xywh {5 5 340 310} box THIN_DOWN_BOX
       code0 {o->value(copyright);}
     }

@@ -2183,18 +2183,6 @@ Fl_Double_Window* makeFlSCAN(bool enable_scan) {
               o->labelsize(24);
               o->labelcolor((Fl_Color)3);
             } // Fl_Box* o
-            { Fl_Box* o = new Fl_Box(465, 310, 165, 20, gettext("\251""2001-2003 by"));
-              o->labeltype(FL_SHADOW_LABEL);
-              o->labelfont(1);
-              o->labelcolor((Fl_Color)3);
-              o->align(Fl_Align(FL_ALIGN_CENTER|FL_ALIGN_INSIDE));
-            } // Fl_Box* o
-            { Fl_Box* o = new Fl_Box(461, 329, 173, 20, gettext("Francesco Bradascio"));
-              o->labeltype(FL_SHADOW_LABEL);
-              o->labelfont(1);
-              o->labelcolor((Fl_Color)3);
-              o->align(Fl_Align(FL_ALIGN_WRAP));
-            } // Fl_Box* o
             { showCopyright = new Fl_Button(461, 206, 173, 143);
               showCopyright->tooltip(gettext("Show Copyright ..."));
               showCopyright->box(FL_NO_BOX);
