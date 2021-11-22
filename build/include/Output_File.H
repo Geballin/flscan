@@ -136,7 +136,7 @@ class Output_File: public Image_Stream
 {
 private:
     int type_;
-    OutputImageFile *formats_[1];
+    OutputImageFile *formats_[2];
 
 public:
     enum {
