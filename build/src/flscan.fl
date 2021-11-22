@@ -201,7 +201,7 @@ Function {auth_callback(SANE_String_Const domain,SANE_Char username[SANE_MAX_USE
 Function {makeFlSCAN(bool enable_scan)} {open
 } {
   Fl_Window FlScan {
-    label {Fl Scan} open
+    label FlScan open
     xywh {1262 463 640 480} type Double
     code0 {o->size_range(640,480,640,480);}
     code1 {copyrightWindow=make_copyright_window(copyrightText);}
@@ -622,7 +622,7 @@ FlScanHistogramTgPixel->do_callback();}
               tooltip {Toggle Logarithmic Representation} xywh {605 330 10 15} box NO_BOX color 50 labeltype NO_LABEL labelfont 1 labelsize 10
             }
           }
-          Fl_Group FlScanSetupJPEG {
+          Fl_Group FlScanSetupJPEG {open
             xywh {461 220 173 129} box FLAT_BOX labeltype NO_LABEL hide
           } {
             Fl_Input FlScanFFmtTxQltJPEG {
@@ -691,7 +691,7 @@ FlScanHistogramTgPixel->do_callback();}
             image {./pixmaps/sane-logo-4.xpm} xywh {460 205 175 145} box THIN_DOWN_BOX align 17
           } {
             Fl_Box {} {
-              label {FlScan 1.0.2}
+              label {FlScan 1.0.3}
               xywh {465 210 165 65} labeltype SHADOW_LABEL labelfont 1 labelsize 24 labelcolor 3
             }
             Fl_Button showCopyright {
@@ -2388,8 +2388,9 @@ int zoomFilter;
                     p->depth,
                     (frame!=SANE_FRAME_GRAY)
                 );
-                OutputImageFile *of=FlScanOutputFile.format(Output_File::JPEG);
-                if (of) {
+                OutputImageFile *of = NULL;
+                if (FlScanOutputFile.type() == Output_File::JPEG) {
+                    of=FlScanOutputFile.format(Output_File::JPEG);
                     of->set_quality((int)FlScanFFmtSlQltJPEG->value());
                     of->set_smoothing((int)FlScanFFmtSlSmtJPEG->value());
                     of->set_optimization((int)FlScanFFmtTbOptJPEG->value());
@@ -2450,7 +2451,7 @@ int zoomFilter;
                                 sprintf(strbuf,"%s_%d",fname,geom);
                             } else {
                                 sprintf(msg,"Saving File - Full Size");
-                                sprintf(strbuf,"%s_FullSize",fname);
+                                sprintf(strbuf,"%s",fname);
                             }
                             if (FlScanOutputFile.extension()) {
                                 strcat(strbuf,FlScanOutputFile.extension());
@@ -2466,7 +2467,7 @@ int zoomFilter;
                     if (!one_saved) {
                         sprintf(msg,"Saving File - Full Size");
                         FlScanUpdateProgress(msg,false);
-                        sprintf(strbuf,"%s_FullSize",fname);
+                        sprintf(strbuf,"%s",fname);
                         if (FlScanOutputFile.extension()) {
                             strcat(strbuf,FlScanOutputFile.extension());
                         }

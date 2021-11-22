@@ -1565,7 +1565,7 @@ EatEvent *FlScanEeLockView=(EatEvent *)0;
 EatEvent *FlScanEeWaitForSaving=(EatEvent *)0;
 
 Fl_Double_Window* makeFlSCAN(bool enable_scan) {
-  { Fl_Double_Window* o = FlScan = new Fl_Double_Window(640, 480, gettext("Fl Scan"));
+  { Fl_Double_Window* o = FlScan = new Fl_Double_Window(640, 480, gettext("FlScan"));
     { FlScanContainer = new Fl_Group(0, 0, 640, 480);
       { Fl_Group* o = new Fl_Group(460, 0, 175, 480);
         o->box(FL_FLAT_BOX);
@@ -2177,7 +2177,7 @@ Fl_Double_Window* makeFlSCAN(bool enable_scan) {
             FlScanSaneLogo->box(FL_THIN_DOWN_BOX);
             FlScanSaneLogo->image( image_sane() );
             FlScanSaneLogo->align(Fl_Align(FL_ALIGN_TOP|FL_ALIGN_INSIDE));
-            { Fl_Box* o = new Fl_Box(465, 210, 165, 65, gettext("FlScan 1.0.2"));
+            { Fl_Box* o = new Fl_Box(465, 210, 165, 65, gettext("FlScan 1.0.3"));
               o->labeltype(FL_SHADOW_LABEL);
               o->labelfont(1);
               o->labelsize(24);
@@ -4248,8 +4248,9 @@ bool FlScanScanCB(void *d,int l,int m) {
                       p->depth,
                       (frame!=SANE_FRAME_GRAY)
                   );
-                  OutputImageFile *of=FlScanOutputFile.format(Output_File::JPEG);
-                  if (of) {
+                  OutputImageFile *of = NULL;
+                  if (FlScanOutputFile.type() == Output_File::JPEG) {
+                      of=FlScanOutputFile.format(Output_File::JPEG);
                       of->set_quality((int)FlScanFFmtSlQltJPEG->value());
                       of->set_smoothing((int)FlScanFFmtSlSmtJPEG->value());
                       of->set_optimization((int)FlScanFFmtTbOptJPEG->value());
@@ -4310,7 +4311,7 @@ bool FlScanScanCB(void *d,int l,int m) {
                                   sprintf(strbuf,"%s_%d",fname,geom);
                               } else {
                                   sprintf(msg,"Saving File - Full Size");
-                                  sprintf(strbuf,"%s_FullSize",fname);
+                                  sprintf(strbuf,"%s",fname);
                               }
                               if (FlScanOutputFile.extension()) {
                                   strcat(strbuf,FlScanOutputFile.extension());
@@ -4326,7 +4327,7 @@ bool FlScanScanCB(void *d,int l,int m) {
                       if (!one_saved) {
                           sprintf(msg,"Saving File - Full Size");
                           FlScanUpdateProgress(msg,false);
-                          sprintf(strbuf,"%s_FullSize",fname);
+                          sprintf(strbuf,"%s",fname);
                           if (FlScanOutputFile.extension()) {
                               strcat(strbuf,FlScanOutputFile.extension());
                           }
